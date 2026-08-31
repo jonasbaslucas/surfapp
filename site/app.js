@@ -1,7 +1,7 @@
 const i18n = {
   nl: {
-    beginnerMode: "Beginner",
-    expertMode: "Expert",
+    beginnerMode: "Kook",
+    expertMode: "Pro",
     eyebrow: "Nederlandse surfvoorspelling",
     heroTitle: "Vind het beste moment om te surfen.",
     heroCopy: "Een mooie, rustige forecast voor Nederlandse surfers: kies een spot, check de komende week en zoom in op 06:00, 10:00, 14:00 of 18:00.",
@@ -33,8 +33,8 @@ const i18n = {
     charmFourWindows: "4 momenten",
   },
   en: {
-    beginnerMode: "Beginner",
-    expertMode: "Expert",
+    beginnerMode: "Kook",
+    expertMode: "Pro",
     eyebrow: "Dutch surf forecast",
     heroTitle: "Find the best time to surf.",
     heroCopy: "A clean forecast for Dutch surfers: choose a spot, scan the week, then zoom into 06:00, 10:00, 14:00 or 18:00.",
@@ -245,6 +245,20 @@ function renderExpert(item) {
   `;
 }
 
+function isMobileFlow() {
+  return window.matchMedia("(max-width: 720px)").matches;
+}
+
+function nudgeMobileTo(selector) {
+  if (!isMobileFlow()) return;
+  window.setTimeout(() => {
+    document.querySelector(selector)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 120);
+}
+
 function render() {
   renderSpots();
   if (!state.forecast) return;
@@ -284,6 +298,7 @@ els.spotList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-spot]");
   if (!button) return;
   loadForecast(button.dataset.spot);
+  nudgeMobileTo(".week-section");
 });
 
 els.dayRail.addEventListener("click", (event) => {
@@ -292,6 +307,7 @@ els.dayRail.addEventListener("click", (event) => {
   state.selectedDay = Number(button.dataset.day);
   state.selectedWindow = 0;
   render();
+  nudgeMobileTo(".windows-section");
 });
 
 els.windowGrid.addEventListener("click", (event) => {
@@ -299,6 +315,7 @@ els.windowGrid.addEventListener("click", (event) => {
   if (!button) return;
   state.selectedWindow = Number(button.dataset.window);
   render();
+  nudgeMobileTo(".today-card");
 });
 
 setLanguage("nl");

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SurfKompas</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=flow3">
 </head>
 <body>
   <div class="ocean-lines" aria-hidden="true">
@@ -20,8 +20,10 @@
         <span class="brand-compass" aria-hidden="true"></span>
       </a>
       <div class="toolbar">
-        <button class="toggle active" type="button" data-lang="nl">NL</button>
-        <button class="toggle" type="button" data-lang="en">EN</button>
+        <div class="language-switch" aria-label="Taal">
+          <button class="toggle active" type="button" data-lang="nl">NL</button>
+          <button class="toggle" type="button" data-lang="en">EN</button>
+        </div>
         <button class="mode-toggle" type="button" id="expertToggle" aria-pressed="false">
           <span data-i18n="beginnerMode">Beginner</span>
         </button>
@@ -74,7 +76,7 @@
         <img class="poster-card" src="/assets/surfboards-poster.png" alt="">
       </section>
 
-      <section>
+      <section class="week-section">
         <div class="section-row">
           <p class="section-kicker" data-i18n="weekForecast">Komende 7 dagen</p>
           <p id="sourceNote" class="source-note"></p>
@@ -82,7 +84,7 @@
         <div id="dayRail" class="day-rail"></div>
       </section>
 
-      <section>
+      <section class="windows-section">
         <div class="section-row">
           <p class="section-kicker" data-i18n="dayParts">Dag verdeeld in 4 momenten</p>
           <p id="selectedDate" class="source-note"></p>
@@ -120,7 +122,7 @@
     </section>
   </main>
 
-  <script src="/forecast.js"></script>
-  <script src="/app.js"></script>
+  <script src="/forecast.js?v=flow3"></script>
+  <script src="/app.js?v=flow3"></script>
 </body>
 </html>
