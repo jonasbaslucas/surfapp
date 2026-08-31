@@ -8,7 +8,7 @@ const i18n = {
     spotsLabel: "Surfspots",
     score: "score",
     selectedWindow: "Gekozen surfraam",
-    weekForecast: "Komende 7 dagen",
+    weekForecast: "Vandaag + 7 dagen",
     dayParts: "Dag verdeeld in 4 momenten",
     expertDetails: "Expert details",
     wind: "Wind",
@@ -29,8 +29,10 @@ const i18n = {
     sourcePrefix: "Bron",
     energyExplain: "Geschatte deep-water swell power",
     charmNorthSea: "Noordzee vibes",
-    charmSevenDays: "7 dagen",
+    charmSevenDays: "8 dagen",
     charmFourWindows: "4 momenten",
+    changeSpot: "Andere spot",
+    changeDay: "Andere dag",
   },
   en: {
     beginnerMode: "Kook",
@@ -41,7 +43,7 @@ const i18n = {
     spotsLabel: "Surf spots",
     score: "score",
     selectedWindow: "Selected surf window",
-    weekForecast: "Next 7 days",
+    weekForecast: "Today + 7 days",
     dayParts: "Day split into 4 moments",
     expertDetails: "Expert details",
     wind: "Wind",
@@ -62,8 +64,10 @@ const i18n = {
     sourcePrefix: "Source",
     energyExplain: "Estimated deep-water swell power",
     charmNorthSea: "North Sea vibes",
-    charmSevenDays: "7 days",
+    charmSevenDays: "8 days",
     charmFourWindows: "4 windows",
+    changeSpot: "Change spot",
+    changeDay: "Change day",
   },
 };
 
@@ -75,6 +79,7 @@ let state = {
   forecast: null,
   selectedDay: 0,
   selectedWindow: 0,
+  mobileStep: "spots",
 };
 
 const els = {
@@ -104,6 +109,8 @@ const els = {
   expertToggle: document.querySelector("#expertToggle"),
   expertPanel: document.querySelector("#expertPanel"),
   expertGrid: document.querySelector("#expertGrid"),
+  backToSpots: document.querySelector("#backToSpots"),
+  backToDays: document.querySelector("#backToDays"),
 };
 
 function t(key) {
@@ -178,6 +185,12 @@ async function loadForecast(spotId) {
   renderSpots();
   state.forecast = await SurfKompasForecast.fetchForecastBundle(spotId);
   render();
+}
+
+function setMobileStep(step) {
+  state.mobileStep = step;
+  document.body.classList.remove("mobile-step-spots", "mobile-step-days", "mobile-step-advice");
+  document.body.classList.add(`mobile-step-${step}`);
 }
 
 function selectedWindow() {
@@ -260,6 +273,7 @@ function nudgeMobileTo(selector) {
 }
 
 function render() {
+  setMobileStep(state.mobileStep);
   renderSpots();
   if (!state.forecast) return;
 
@@ -297,8 +311,9 @@ els.spotSearch.addEventListener("input", renderSpots);
 els.spotList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-spot]");
   if (!button) return;
+  setMobileStep("days");
   loadForecast(button.dataset.spot);
-  nudgeMobileTo(".week-section");
+  nudgeMobileTo(".forecast-area");
 });
 
 els.dayRail.addEventListener("click", (event) => {
@@ -306,17 +321,32 @@ els.dayRail.addEventListener("click", (event) => {
   if (!button) return;
   state.selectedDay = Number(button.dataset.day);
   state.selectedWindow = 0;
+  setMobileStep("advice");
   render();
-  nudgeMobileTo(".windows-section");
+  nudgeMobileTo(".forecast-area");
 });
 
 els.windowGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-window]");
   if (!button) return;
   state.selectedWindow = Number(button.dataset.window);
+  setMobileStep("advice");
   render();
   nudgeMobileTo(".today-card");
 });
 
+els.backToSpots.addEventListener("click", () => {
+  setMobileStep("spots");
+  render();
+  nudgeMobileTo(".spot-panel");
+});
+
+els.backToDays.addEventListener("click", () => {
+  setMobileStep("days");
+  render();
+  nudgeMobileTo(".forecast-area");
+});
+
+setMobileStep("spots");
 setLanguage("nl");
 loadSpots().then(() => loadForecast(state.selectedSpot));

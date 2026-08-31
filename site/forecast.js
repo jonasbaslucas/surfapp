@@ -1,7 +1,7 @@
 const SurfKompasForecast = (() => {
   const forecastApi = "https://api.open-meteo.com/v1/forecast";
   const marineApi = "https://marine-api.open-meteo.com/v1/marine";
-  const displayDays = 7;
+  const displayDays = 8;
   const defaultSpot = "kijkduin";
   const directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
   const timeWindows = ["06:00", "10:00", "14:00", "18:00"];

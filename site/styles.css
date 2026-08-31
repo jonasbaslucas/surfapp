@@ -685,6 +685,10 @@ h1 {
   padding: 17px;
 }
 
+.mobile-flow-actions {
+  display: none;
+}
+
 .expert-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(140px, 1fr));
@@ -1271,5 +1275,166 @@ h1 {
 
   .metric strong {
     font-size: 22px;
+  }
+}
+
+@media (max-width: 720px) {
+  body.mobile-step-spots .forecast-area {
+    display: none;
+  }
+
+  body.mobile-step-days .spot-panel,
+  body.mobile-step-advice .spot-panel {
+    display: none;
+  }
+
+  body.mobile-step-days .today-card,
+  body.mobile-step-days .windows-section,
+  body.mobile-step-days .detail-grid,
+  body.mobile-step-days .expert-panel {
+    display: none;
+  }
+
+  body.mobile-step-advice .week-section {
+    display: none;
+  }
+
+  .mobile-flow-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    order: 2;
+  }
+
+  .mobile-flow-actions button {
+    border: 1px solid rgba(20,37,44,.12);
+    border-radius: 999px;
+    padding: 8px 11px;
+    color: var(--deep);
+    background: rgba(255,255,255,.72);
+    box-shadow: 0 7px 16px rgba(20,37,44,.07);
+    cursor: pointer;
+  }
+
+  body.mobile-step-days #backToDays,
+  body.mobile-step-spots .mobile-flow-actions {
+    display: none;
+  }
+
+  .forecast-area > .selected-heading {
+    order: 1;
+  }
+
+  .forecast-area > .week-section {
+    order: 3;
+  }
+
+  .forecast-area > .today-card {
+    order: 3;
+  }
+
+  .forecast-area > .detail-grid {
+    order: 4;
+  }
+
+  .forecast-area > .expert-panel {
+    order: 5;
+  }
+
+  .forecast-area > .windows-section {
+    order: 6;
+  }
+
+  body.mobile-step-advice .selected-heading {
+    display: none;
+  }
+
+  body.mobile-step-advice .mobile-flow-actions {
+    order: 1;
+  }
+
+  .day-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    padding: 10px 0 0;
+  }
+
+  .day-card {
+    flex: initial;
+    min-height: 112px;
+    padding: 10px;
+  }
+
+  .day-card strong {
+    font-size: 13px;
+  }
+
+  .day-meta {
+    -webkit-line-clamp: 1;
+  }
+
+  .window-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .window-card {
+    min-height: 108px;
+    padding: 11px;
+  }
+
+  .window-card h4 {
+    margin-top: 7px;
+    font-size: 15px;
+  }
+
+  .today-card {
+    padding: 20px 18px 52px;
+  }
+
+  .today-card h3 {
+    font-size: clamp(27px, 7.5vw, 36px);
+  }
+
+  .detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric {
+    padding: 12px;
+  }
+
+  .metric strong {
+    font-size: 18px;
+  }
+
+  .metric small {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  body:not(.mobile-step-advice) .expert-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .day-rail,
+  .window-grid,
+  .detail-grid,
+  .expert-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero {
+    min-height: 375px;
+  }
+
+  .window-card {
+    min-height: 104px;
+  }
+
+  .metric strong {
+    font-size: 17px;
   }
 }
