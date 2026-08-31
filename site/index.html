@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SurfKompas</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="ocean-lines" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <header class="hero">
+    <nav class="topbar" aria-label="Hoofdmenu">
+      <a class="brand" href="/">
+        <span class="brand-word" data-nl="SurfKompas" data-en="SurfCompass">SurfKompas</span>
+        <span class="brand-compass" aria-hidden="true"></span>
+      </a>
+      <div class="toolbar">
+        <button class="toggle active" type="button" data-lang="nl">NL</button>
+        <button class="toggle" type="button" data-lang="en">EN</button>
+        <button class="mode-toggle" type="button" id="expertToggle" aria-pressed="false">
+          <span data-i18n="beginnerMode">Beginner</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="hero-content">
+      <p class="eyebrow" data-i18n="eyebrow">Nederlandse surfvoorspelling</p>
+      <h1 data-i18n="heroTitle">Vind het beste moment om te surfen.</h1>
+      <p data-i18n="heroCopy">
+        Een mooie, rustige forecast voor Nederlandse surfers: kies een spot, check de komende week en zoom in op 06:00, 10:00, 14:00 of 18:00.
+      </p>
+      <div class="surf-charms" aria-hidden="true">
+        <span data-i18n="charmNorthSea">Noordzee vibes</span>
+        <span data-i18n="charmSevenDays">7 dagen</span>
+        <span data-i18n="charmFourWindows">4 momenten</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="spot-panel" aria-label="Surfspots">
+      <div class="panel-heading">
+        <p data-i18n="spotsLabel">Surfspots</p>
+        <span id="spotCount">20</span>
+      </div>
+      <input id="spotSearch" class="spot-search" type="search" placeholder="Zoek spot of regio">
+      <div id="spotList" class="spot-list"></div>
+    </aside>
+
+    <section class="forecast-area">
+      <div class="selected-heading">
+        <div>
+          <p id="statusLabel" class="status-label">Live model</p>
+          <h2 id="spotName">Kijkduin</h2>
+          <p id="spotDescription"></p>
+        </div>
+        <div class="score-medallion">
+          <span id="scoreValue">--</span>
+          <small data-i18n="score">score</small>
+        </div>
+      </div>
+
+      <section class="today-card">
+        <div>
+          <p class="section-kicker" data-i18n="selectedWindow">Gekozen surfraam</p>
+          <h3 id="vibeTitle">Even laden...</h3>
+          <p id="vibeText"></p>
+        </div>
+        <img class="poster-card" src="/assets/surfboards-poster.png" alt="">
+      </section>
+
+      <section>
+        <div class="section-row">
+          <p class="section-kicker" data-i18n="weekForecast">Komende 7 dagen</p>
+          <p id="sourceNote" class="source-note"></p>
+        </div>
+        <div id="dayRail" class="day-rail"></div>
+      </section>
+
+      <section>
+        <div class="section-row">
+          <p class="section-kicker" data-i18n="dayParts">Dag verdeeld in 4 momenten</p>
+          <p id="selectedDate" class="source-note"></p>
+        </div>
+        <div id="windowGrid" class="window-grid"></div>
+      </section>
+
+      <section class="detail-grid">
+        <article class="metric">
+          <span data-i18n="wind">Wind</span>
+          <strong id="windValue">--</strong>
+          <small id="windMeta"></small>
+        </article>
+        <article class="metric">
+          <span data-i18n="swell">Swell</span>
+          <strong id="swellValue">--</strong>
+          <small id="swellMeta"></small>
+        </article>
+        <article class="metric energy">
+          <span data-i18n="energy">Swellenergie</span>
+          <strong id="energyValue">--</strong>
+          <small id="energyMeta"></small>
+        </article>
+        <article class="metric">
+          <span data-i18n="temperature">Temperatuur</span>
+          <strong id="tempValue">--</strong>
+          <small id="tempMeta"></small>
+        </article>
+      </section>
+
+      <section class="expert-panel" id="expertPanel" hidden>
+        <p class="section-kicker" data-i18n="expertDetails">Expert details</p>
+        <div id="expertGrid" class="expert-grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/forecast.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

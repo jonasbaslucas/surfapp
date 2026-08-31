@@ -1,6 +1,10 @@
 from surf_gui import SurfApp
 
 
-if __name__ == "__main__":
+def main():
     app = SurfApp()
     app.mainloop()
+
+
+if __name__ == "__main__":
+    main()

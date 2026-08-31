@@ -1,6 +1,11 @@
 import tkinter as tk
+import math
+from tkinter import ttk
 import customtkinter as ctk
 from PIL import Image, ImageTk
+
+from surf_logic import evaluate_conditions
+from surf_spots import SURF_SPOTS
 
 
 # ============================================================
@@ -37,6 +42,14 @@ SURFBOARD = "#D9A441"
 SURFBOARD_DARK = "#174A56"
 
 TEXT_LIGHT = "#FFF0CF"
+
+PANEL_DARK = "#10242D"
+PANEL = "#274554"
+PANEL_EDGE = "#E0B365"
+PANEL_SHADOW = "#0D1B22"
+PANEL_TEXT = "#FFF6E2"
+PANEL_ACCENT = "#E4572E"
+PANEL_SOFT = "#F8E4B1"
 
 
 # ============================================================
@@ -90,6 +103,33 @@ class SurfApp(ctk.CTk):
         self.wind_speed = 12.0
 
         # ----------------------------------------------------
+        # Current period in seconds
+        # ----------------------------------------------------
+
+        self.period = 9.0
+
+        # ----------------------------------------------------
+        # Surf spot selection
+        # ----------------------------------------------------
+
+        self.spot_order = list(SURF_SPOTS.keys())
+        self.spot_name_to_key = {
+            spot["name"]: key
+            for key, spot in SURF_SPOTS.items()
+        }
+        self.selected_spot_key = self.spot_order[0]
+        self.selected_spot_name = SURF_SPOTS[
+            self.selected_spot_key
+        ]["name"]
+
+        # ----------------------------------------------------
+        # Wind animation
+        # ----------------------------------------------------
+
+        self.wind_pulse_phase = 0.0
+        self.wind_animation_job = None
+
+        # ----------------------------------------------------
         # Load the three backgrounds
         # ----------------------------------------------------
 
@@ -126,6 +166,13 @@ class SurfApp(ctk.CTk):
         self.background_id = None
 
         # ----------------------------------------------------
+        # UI styles and dropdown
+        # ----------------------------------------------------
+
+        self.configure_widget_styles()
+        self.create_spot_selector()
+
+        # ----------------------------------------------------
         # Mouse interaction
         # ----------------------------------------------------
 
@@ -152,6 +199,438 @@ class SurfApp(ctk.CTk):
             100,
             self.update_scene
         )
+
+    # ========================================================
+    # SHAPE HELPERS
+    # ========================================================
+
+    def draw_rounded_rect(
+        self,
+        x1,
+        y1,
+        x2,
+        y2,
+        radius,
+        **kwargs
+    ):
+
+        points = [
+            x1 + radius, y1,
+            x2 - radius, y1,
+            x2, y1,
+            x2, y1 + radius,
+            x2, y2 - radius,
+            x2, y2,
+            x2 - radius, y2,
+            x1 + radius, y2,
+            x1, y2,
+            x1, y2 - radius,
+            x1, y1 + radius,
+            x1, y1,
+        ]
+
+        return self.canvas.create_polygon(
+            *points,
+            smooth=True,
+            splinesteps=24,
+            **kwargs
+        )
+
+    def draw_capsule(
+        self,
+        x1,
+        y1,
+        x2,
+        y2,
+        radius,
+        **kwargs
+    ):
+
+        return self.draw_rounded_rect(
+            x1,
+            y1,
+            x2,
+            y2,
+            radius,
+            **kwargs
+        )
+
+    def configure_widget_styles(self):
+
+        style = ttk.Style()
+
+        try:
+            style.theme_use("clam")
+        except tk.TclError:
+            pass
+
+        style.configure(
+            "Surf.TCombobox",
+            fieldbackground=PANEL,
+            background=PANEL,
+            foreground=PANEL_TEXT,
+            arrowcolor=PANEL_SOFT,
+            bordercolor=PANEL_EDGE,
+            lightcolor=PANEL_EDGE,
+            darkcolor=PANEL_SHADOW,
+            padding=(10, 8),
+            relief="flat"
+        )
+
+        style.map(
+            "Surf.TCombobox",
+            fieldbackground=[
+                ("readonly", PANEL),
+                ("active", PANEL),
+            ],
+            foreground=[
+                ("readonly", PANEL_TEXT),
+                ("active", PANEL_TEXT),
+            ],
+            background=[
+                ("readonly", PANEL),
+                ("active", PANEL),
+            ],
+        )
+
+    def create_spot_selector(self):
+
+        self.spot_selector_frame = tk.Frame(
+            self.canvas,
+            bg=PANEL
+        )
+
+        self.spot_selector_var = tk.StringVar(
+            value=self.selected_spot_name
+        )
+
+        self.spot_selector = ttk.Combobox(
+            self.spot_selector_frame,
+            textvariable=self.spot_selector_var,
+            values=[
+                SURF_SPOTS[key]["name"]
+                for key in self.spot_order
+            ],
+            state="readonly",
+            style="Surf.TCombobox",
+            width=28
+        )
+
+        self.spot_selector.bind(
+            "<<ComboboxSelected>>",
+            self.on_spot_selected
+        )
+
+        self.spot_selector.pack(
+            fill="x",
+            padx=2,
+            pady=2
+        )
+
+        self.spot_selector_window_id = None
+
+    def get_selected_spot(self):
+
+        return SURF_SPOTS[self.selected_spot_key]
+
+    def get_condition_summary(self):
+
+        spot = self.get_selected_spot()
+
+        return evaluate_conditions(
+            spot,
+            self.wind_direction,
+            self.swell_direction,
+            self.swell,
+            self.period
+        )
+
+    def on_spot_selected(self, event=None):
+
+        selected_name = self.spot_selector_var.get()
+
+        self.selected_spot_key = self.spot_name_to_key[
+            selected_name
+        ]
+
+        self.selected_spot_name = selected_name
+
+        self.draw_verdict_card()
+
+    def draw_wind_cluster_panel(self):
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        panel_left = width * 0.53
+        panel_right = width * 0.92
+        panel_top = height * 0.53
+        panel_bottom = height * 0.91
+
+        glow = 4 + 2 * (0.5 + 0.5 * math.sin(self.wind_pulse_phase))
+
+        self.draw_rounded_rect(
+            panel_left + glow,
+            panel_top + glow,
+            panel_right + glow,
+            panel_bottom + glow,
+            34,
+            fill=PANEL_SHADOW,
+            outline="",
+            tags="wind_cluster"
+        )
+
+        self.draw_rounded_rect(
+            panel_left,
+            panel_top,
+            panel_right,
+            panel_bottom,
+            34,
+            fill=PANEL,
+            outline=PANEL_EDGE,
+            width=2,
+            tags="wind_cluster"
+        )
+
+        self.canvas.create_text(
+            panel_left + 28,
+            panel_top + 28,
+            text="WIND",
+            anchor="w",
+            fill=PANEL_TEXT,
+            font=("Arial", 14, "bold"),
+            tags="wind_cluster"
+        )
+
+        self.canvas.create_text(
+            panel_left + 28,
+            panel_top + 52,
+            text="Direction and strength",
+            anchor="w",
+            fill=PANEL_SOFT,
+            font=("Arial", 9, "italic"),
+            tags="wind_cluster"
+        )
+
+    def draw_spot_card(self):
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        card_left = width * 0.03
+        card_top = height * 0.05
+        card_right = width * 0.28
+        card_bottom = height * 0.16
+
+        self.draw_rounded_rect(
+            card_left + 5,
+            card_top + 6,
+            card_right + 5,
+            card_bottom + 6,
+            24,
+            fill=PANEL_SHADOW,
+            outline="",
+            tags="ui_panels"
+        )
+
+        self.draw_rounded_rect(
+            card_left,
+            card_top,
+            card_right,
+            card_bottom,
+            24,
+            fill=PANEL,
+            outline=PANEL_EDGE,
+            width=2,
+            tags="ui_panels"
+        )
+
+        self.canvas.create_text(
+            card_left + 22,
+            card_top + 24,
+            text="SURF SPOT",
+            anchor="w",
+            fill=PANEL_SOFT,
+            font=("Arial", 9, "bold"),
+            tags="ui_panels"
+        )
+
+        self.canvas.create_text(
+            card_left + 22,
+            card_top + 46,
+            text="Choose a beach to score",
+            anchor="w",
+            fill=PANEL_TEXT,
+            font=("Arial", 11, "bold"),
+            tags="ui_panels"
+        )
+
+        selector_x = card_left + 18
+        selector_y = card_top + 62
+        selector_w = card_right - card_left - 36
+        selector_h = 30
+
+        self.draw_rounded_rect(
+            selector_x - 2,
+            selector_y - 2,
+            selector_x + selector_w + 2,
+            selector_y + selector_h + 2,
+            14,
+            fill="#12252E",
+            outline="",
+            tags="ui_panels"
+        )
+
+        if self.spot_selector_window_id is None:
+
+            self.spot_selector_window_id = self.canvas.create_window(
+                selector_x,
+                selector_y,
+                anchor="nw",
+                window=self.spot_selector_frame,
+                width=selector_w,
+                height=selector_h,
+                tags="ui_panels"
+            )
+
+        else:
+
+            self.canvas.coords(
+                self.spot_selector_window_id,
+                selector_x,
+                selector_y
+            )
+
+            self.canvas.itemconfig(
+                self.spot_selector_window_id,
+                width=selector_w,
+                height=selector_h
+            )
+
+        self.canvas.tag_raise("ui_panels")
+        self.spot_selector_frame.lift()
+
+    def draw_verdict_card(self):
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        card_width = width * 0.28
+        card_height = height * 0.18
+        card_left = width * 0.35
+        card_top = height * 0.04
+
+        summary = self.get_condition_summary()
+        spot = self.get_selected_spot()
+
+        self.canvas.delete("verdict_card")
+
+        self.draw_rounded_rect(
+            card_left + 6,
+            card_top + 7,
+            card_left + card_width + 6,
+            card_top + card_height + 7,
+            28,
+            fill=PANEL_SHADOW,
+            outline="",
+            tags="verdict_card"
+        )
+
+        self.draw_rounded_rect(
+            card_left,
+            card_top,
+            card_left + card_width,
+            card_top + card_height,
+            28,
+            fill=PANEL,
+            outline=PANEL_EDGE,
+            width=2,
+            tags="verdict_card"
+        )
+
+        self.canvas.create_text(
+            card_left + 24,
+            card_top + 24,
+            text=spot["name"],
+            anchor="w",
+            fill=PANEL_TEXT,
+            font=("Arial", 13, "bold"),
+            tags="verdict_card"
+        )
+
+        self.canvas.create_text(
+            card_left + 24,
+            card_top + 48,
+            text=summary["verdict"],
+            anchor="w",
+            fill=PANEL_SOFT,
+            font=("Arial", 18, "bold"),
+            tags="verdict_card"
+        )
+
+        score_text = f"{summary['total_score']} / 100"
+        self.canvas.create_text(
+            card_left + card_width - 24,
+            card_top + 24,
+            text=score_text,
+            anchor="e",
+            fill="#F8E4B1",
+            font=("Arial", 18, "bold"),
+            tags="verdict_card"
+        )
+
+        self.canvas.create_text(
+            card_left + card_width - 24,
+            card_top + 48,
+            text=f"Period {self.period:.1f}s",
+            anchor="e",
+            fill=PANEL_TEXT,
+            font=("Arial", 9, "bold"),
+            tags="verdict_card"
+        )
+
+        stat_y = card_top + 85
+        stats = [
+            ("Wind", summary["wind_quality"]),
+            ("Swell", summary["swell_direction_quality"]),
+            ("Height", summary["swell_height_quality"]),
+            ("Period", summary["period_quality"]),
+        ]
+
+        stat_width = (card_width - 60) / 4
+
+        for index, (label, value) in enumerate(stats):
+            stat_left = card_left + 18 + index * stat_width
+            self.draw_rounded_rect(
+                stat_left,
+                stat_y,
+                stat_left + stat_width - 8,
+                stat_y + 40,
+                14,
+                fill="#12252E",
+                outline="",
+                tags="verdict_card"
+            )
+            self.canvas.create_text(
+                stat_left + 10,
+                stat_y + 11,
+                text=label,
+                anchor="w",
+                fill=PANEL_SOFT,
+                font=("Arial", 8, "bold"),
+                tags="verdict_card"
+            )
+            self.canvas.create_text(
+                stat_left + 10,
+                stat_y + 26,
+                text=value,
+                anchor="w",
+                fill=PANEL_TEXT,
+                font=("Arial", 9, "bold"),
+                tags="verdict_card"
+            )
+
+        self.canvas.tag_raise("verdict_card")
 
     # ========================================================
     # DETERMINE BACKGROUND
@@ -773,8 +1252,6 @@ class SurfApp(ctk.CTk):
 
     def draw_windsock(self):
 
-        import math
-
         # ====================================================
         # DELETE OLD WINDSOCK
         # ====================================================
@@ -801,28 +1278,35 @@ class SurfApp(ctk.CTk):
         # SIZE
         # ====================================================
 
-        sock_length = min(
-            width * 0.13,
-            height * 0.20
+        max_length = min(
+            width * 0.17,
+            height * 0.19
         )
 
-        sock_width = sock_length * 0.28
+        min_length = max_length * 0.28
 
-        self.windsock_radius = sock_length * 0.85
-
-        # ====================================================
-        # WIND SPEED
-        #
-        # Convert 0–40 knots into 0.0–1.0
-        # ====================================================
-
-        wind_fraction = max(
+        speed_fraction = max(
             0.0,
             min(
                 self.wind_speed / MAX_WIND_SPEED,
                 1.0
             )
         )
+
+        sock_length = (
+            min_length
+            + (max_length - min_length)
+            * speed_fraction
+        )
+
+        sock_width = max(
+            20,
+            sock_length * 0.36
+        )
+
+        pulse = 0.5 + 0.5 * math.sin(self.wind_pulse_phase)
+
+        self.windsock_radius = max_length * 0.82
 
         # ====================================================
         # COMPASS DIRECTIONS
@@ -839,230 +1323,142 @@ class SurfApp(ctk.CTk):
             self.wind_direction
         )
 
-        # ====================================================
-        # WIND DIRECTION
-        #
         # Wind comes FROM self.wind_direction.
-        # Windsock points AWAY from it.
-        # ====================================================
+        # The sock points AWAY from it, like a real windsock.
 
         wind_from_degrees = direction_index * 22.5
-
-        sock_degrees = (
-                               wind_from_degrees + 180
-                       ) % 360
+        sock_degrees = (wind_from_degrees + 180) % 360
 
         # Convert compass angle to canvas angle
 
-        wind_angle = math.radians(
-            sock_degrees - 90
-        )
+        sock_angle = math.radians(sock_degrees - 90)
 
-        # ====================================================
-        # DRAW ATTACHMENT RING
-        # ====================================================
+        direction_x = math.cos(sock_angle)
+        direction_y = math.sin(sock_angle)
+        perp_x = -direction_y
+        perp_y = direction_x
 
-        ring_radius = sock_width * 0.42
+        tip_x = base_x + direction_x * sock_length
+        tip_y = base_y + direction_y * sock_length
+
+        # Soft ambient shadow so the control floats above the scene.
+
+        shadow_x = base_x + direction_x * 6 + perp_x * 5
+        shadow_y = base_y + direction_y * 6 + perp_y * 5
 
         self.canvas.create_oval(
-            base_x - ring_radius,
-            base_y - ring_radius,
-            base_x + ring_radius,
-            base_y + ring_radius,
-            fill="#5B371A",
-            outline="#E0B365",
+            shadow_x - sock_width * (0.58 + pulse * 0.02),
+            shadow_y - sock_width * (0.45 + pulse * 0.02),
+            shadow_x + sock_length * (0.92 + pulse * 0.02),
+            shadow_y + sock_width * (0.48 + pulse * 0.02),
+            fill="#1B2D33",
+            outline="",
+            tags="windsock"
+        )
+
+        self.canvas.create_oval(
+            base_x - sock_width * (0.68 + pulse * 0.03),
+            base_y - sock_width * (0.50 + pulse * 0.03),
+            tip_x + sock_width * (0.22 + pulse * 0.03),
+            tip_y + sock_width * (0.46 + pulse * 0.03),
+            outline="#F2D69A",
+            width=1 + pulse * 1.2,
+            tags="windsock"
+        )
+
+        # Base mount
+
+        mount_radius = max(10, sock_width * 0.18)
+
+        self.canvas.create_oval(
+            base_x - mount_radius - 3,
+            base_y - mount_radius - 3,
+            base_x + mount_radius + 3,
+            base_y + mount_radius + 3,
+            fill="#2A1810",
+            outline="",
+            tags="windsock"
+        )
+
+        self.canvas.create_oval(
+            base_x - mount_radius,
+            base_y - mount_radius,
+            base_x + mount_radius,
+            base_y + mount_radius,
+            fill="#8C5A2B",
+            outline="#F1D08A",
             width=2,
             tags="windsock"
         )
 
-        # ====================================================
-        # COLOURS
-        # ====================================================
+        self.canvas.create_oval(
+            base_x - mount_radius * 0.42,
+            base_y - mount_radius * 0.42,
+            base_x + mount_radius * 0.42,
+            base_y + mount_radius * 0.42,
+            fill="#4A2B16",
+            outline="",
+            tags="windsock"
+        )
 
-        colors = [
-            "#D64532",
+        # Tether line gives the sock a clean attachment point.
+
+        tether_x = base_x + direction_x * sock_width * 0.28
+        tether_y = base_y + direction_y * sock_width * 0.28
+
+        self.canvas.create_line(
+            base_x,
+            base_y,
+            tether_x,
+            tether_y,
+            fill="#F1D08A",
+            width=2 + pulse * 0.6,
+            capstyle=tk.ROUND,
+            tags="windsock"
+        )
+
+        # Main sock body as a polished top-down banner.
+
+        segments = 6
+        segment_length = sock_length / segments
+        start_width = sock_width
+        end_width = max(8, sock_width * 0.38)
+        palette = [
+            "#B33A2F",
             "#F4E6D0",
-            "#D64532",
-            "#F4E6D0",
-            "#D64532"
+            "#C84A37",
+            "#F8F1E8",
+            "#A8352C",
+            "#F0D6BB",
         ]
 
-        segments = 5
-
-        segment_length = sock_length / segments
-
-        # ====================================================
-        # CALCULATE WINDSOCK PATH
-        #
-        # At 0 kt:
-        # every segment points downward.
-        #
-        # At 40 kt:
-        # every segment points completely in
-        # the wind direction.
-        #
-        # In between:
-        # the windsock gradually curves.
-        # ====================================================
-
-        points = []
-
-        current_x = base_x
-        current_y = base_y
-
-        for i in range(segments + 1):
-
-            if i == 0:
-                points.append(
-                    (current_x, current_y)
-                )
-
-                continue
-
-            # ------------------------------------------------
-            # Position along the windsock
-            #
-            # The end reacts more strongly to the wind
-            # than the beginning.
-            # ------------------------------------------------
-
-            position_fraction = i / segments
-
-            local_wind_effect = (
-                    wind_fraction
-                    * (
-                            0.35
-                            + 0.65 * position_fraction
-                    )
-            )
-
-            # ------------------------------------------------
-            # DOWNWARD DIRECTION
-            # ------------------------------------------------
-
-            down_angle = math.radians(90)
-
-            # ------------------------------------------------
-            # INTERPOLATE BETWEEN DOWN AND WIND DIRECTION
-            #
-            # Using sine/cosine interpolation avoids
-            # problems with compass angles crossing 0°.
-            # ------------------------------------------------
-
-            down_x = math.cos(down_angle)
-            down_y = math.sin(down_angle)
-
-            wind_x = math.cos(wind_angle)
-            wind_y = math.sin(wind_angle)
-
-            direction_x = (
-                    down_x * (1 - local_wind_effect)
-                    + wind_x * local_wind_effect
-            )
-
-            direction_y = (
-                    down_y * (1 - local_wind_effect)
-                    + wind_y * local_wind_effect
-            )
-
-            # Normalize
-
-            magnitude = math.sqrt(
-                direction_x ** 2
-                + direction_y ** 2
-            )
-
-            direction_x /= magnitude
-            direction_y /= magnitude
-
-            # Move along windsock
-
-            current_x += (
-                    direction_x
-                    * segment_length
-            )
-
-            current_y += (
-                    direction_y
-                    * segment_length
-            )
-
-            points.append(
-                (current_x, current_y)
-            )
-
-        # ====================================================
-        # DRAW EACH WINDSOCK SEGMENT
-        # ====================================================
-
         for i in range(segments):
-            start_x, start_y = points[i]
-            end_x, end_y = points[i + 1]
+            frac0 = i / segments
+            frac1 = (i + 1) / segments
 
-            # Direction of this segment
+            seg_start_x = tether_x + direction_x * segment_length * i
+            seg_start_y = tether_y + direction_y * segment_length * i
+            seg_end_x = tether_x + direction_x * segment_length * (i + 1)
+            seg_end_y = tether_y + direction_y * segment_length * (i + 1)
 
-            dx = end_x - start_x
-            dy = end_y - start_y
-
-            length = math.sqrt(
-                dx ** 2 + dy ** 2
-            )
-
-            # Perpendicular direction
-
-            perp_x = -dy / length
-            perp_y = dx / length
-
-            # Tapering
-
-            start_width = (
-                    sock_width
-                    * (
-                            1
-                            - 0.45 * (i / segments)
-                    )
-            )
-
-            end_width = (
-                    sock_width
-                    * (
-                            1
-                            - 0.45 * ((i + 1) / segments)
-                    )
-            )
-
-            # Four corners
+            width0 = start_width + (end_width - start_width) * frac0
+            width1 = start_width + (end_width - start_width) * frac1
 
             p1 = (
-                start_x
-                + perp_x * start_width / 2,
-
-                start_y
-                + perp_y * start_width / 2
+                seg_start_x + perp_x * width0 / 2,
+                seg_start_y + perp_y * width0 / 2,
             )
-
             p2 = (
-                end_x
-                + perp_x * end_width / 2,
-
-                end_y
-                + perp_y * end_width / 2
+                seg_end_x + perp_x * width1 / 2,
+                seg_end_y + perp_y * width1 / 2,
             )
-
             p3 = (
-                end_x
-                - perp_x * end_width / 2,
-
-                end_y
-                - perp_y * end_width / 2
+                seg_end_x - perp_x * width1 / 2,
+                seg_end_y - perp_y * width1 / 2,
             )
-
             p4 = (
-                start_x
-                - perp_x * start_width / 2,
-
-                start_y
-                - perp_y * start_width / 2
+                seg_start_x - perp_x * width0 / 2,
+                seg_start_y - perp_y * width0 / 2,
             )
 
             self.canvas.create_polygon(
@@ -1070,53 +1466,50 @@ class SurfApp(ctk.CTk):
                 p2,
                 p3,
                 p4,
-                fill=colors[i],
+                fill=palette[i],
                 outline="#7A3B2E",
                 width=1,
                 tags="windsock"
             )
 
-        # ====================================================
-        # OPEN END
-        # ====================================================
+        # A subtle highlight along the upper edge keeps it from feeling flat.
 
-        end_x, end_y = points[-1]
-
-        last_x, last_y = points[-2]
-
-        dx = end_x - last_x
-        dy = end_y - last_y
-
-        length = math.sqrt(
-            dx ** 2 + dy ** 2
-        )
-
-        perp_x = -dy / length
-        perp_y = dx / length
-
-        end_width = sock_width * 0.55
-
-        end_top = (
-            end_x
-            + perp_x * end_width / 2,
-
-            end_y
-            + perp_y * end_width / 2
-        )
-
-        end_bottom = (
-            end_x
-            - perp_x * end_width / 2,
-
-            end_y
-            - perp_y * end_width / 2
-        )
+        highlight_start_x = tether_x + perp_x * (start_width * 0.30)
+        highlight_start_y = tether_y + perp_y * (start_width * 0.30)
+        highlight_end_x = tip_x + perp_x * (end_width * 0.22)
+        highlight_end_y = tip_y + perp_y * (end_width * 0.22)
 
         self.canvas.create_line(
-            end_top,
-            end_bottom,
-            fill="#7A3B2E",
+            highlight_start_x,
+            highlight_start_y,
+            highlight_end_x,
+            highlight_end_y,
+            fill="#FFF8EE",
+            width=1.5 + pulse * 0.5,
+            capstyle=tk.ROUND,
+            tags="windsock"
+        )
+
+        # Rounded tip cap.
+
+        self.canvas.create_oval(
+            tip_x - 7,
+            tip_y - 7,
+            tip_x + 7,
+            tip_y + 7,
+            fill="#6E271F",
+            outline="#F4D8B2",
             width=2,
+            tags="windsock"
+        )
+
+        self.canvas.create_oval(
+            tip_x - 3,
+            tip_y - 3,
+            tip_x + 3,
+            tip_y + 3,
+            fill="#FFF5E7",
+            outline="",
             tags="windsock"
         )
 
@@ -1124,15 +1517,43 @@ class SurfApp(ctk.CTk):
         # LABEL
         # ====================================================
 
+        label_w = 148
+        label_h = 48
+        label_x = self.windsock_x + width * 0.03
+        label_y = self.windsock_y + height * 0.04
+
+        self.draw_rounded_rect(
+            label_x - label_w / 2 + 4,
+            label_y - label_h / 2 + 4,
+            label_x + label_w / 2 + 4,
+            label_y + label_h / 2 + 4,
+            18,
+            fill="#10242D",
+            outline="",
+            tags="windsock"
+        )
+
+        self.draw_rounded_rect(
+            label_x - label_w / 2,
+            label_y - label_h / 2,
+            label_x + label_w / 2,
+            label_y + label_h / 2,
+            18,
+            fill="#274554",
+            outline="#E0B365",
+            width=2,
+            tags="windsock"
+        )
+
         self.canvas.create_text(
-            self.windsock_x,
-            self.windsock_y + sock_length * 1.15,
+            label_x,
+            label_y - 8,
             text=(
                 f"WIND: {self.wind_direction}\n"
                 f"{self.wind_speed:.1f} kt"
             ),
-            fill="#FFF0CF",
-            font=("Arial", 12, "bold"),
+            fill="#FFF6E2",
+            font=("Arial", 11, "bold"),
             tags="windsock"
         )
 
@@ -1293,16 +1714,7 @@ class SurfApp(ctk.CTk):
         if width < 100 or height < 100:
             return
 
-        # ====================================================
-        # SLIDER POSITION
-        #
-        # Place it LEFT of the windsock.
-        #
-        # Change these values later if necessary.
-        # ====================================================
-
         rail_x = self.windsock_x - width * 0.13
-
         rail_top = self.windsock_y - height * 0.10
         rail_bottom = self.windsock_y + height * 0.10
 
@@ -1327,89 +1739,121 @@ class SurfApp(ctk.CTk):
                 * (rail_bottom - rail_top)
         )
 
-        # ====================================================
-        # WIND SPEED VALUE
-        # ====================================================
+        pulse = 0.5 + 0.5 * math.sin(self.wind_pulse_phase)
 
-        self.canvas.create_text(
-            rail_x,
-            rail_top - 28,
-            text=f"{self.wind_speed:.1f} kt",
-            fill=TEXT_LIGHT,
-            font=("Arial", 12, "bold"),
+        panel_left = rail_x - 66
+        panel_right = rail_x + 58
+        panel_top = rail_top - 54
+        panel_bottom = rail_bottom + 54
+
+        # Soft floating panel behind the control.
+
+        self.draw_rounded_rect(
+            panel_left + 5,
+            panel_top + 6,
+            panel_right + 5,
+            panel_bottom + 6,
+            24,
+            fill="#12252E",
+            outline="",
             tags="wind_slider"
         )
 
-        # ====================================================
-        # BAMBOO SHADOW
-        # ====================================================
+        self.draw_rounded_rect(
+            panel_left,
+            panel_top,
+            panel_right,
+            panel_bottom,
+            24,
+            fill="#28404E",
+            outline="#E0B365",
+            width=2,
+            tags="wind_slider"
+        )
+
+        # Title and value badge.
+
+        self.canvas.create_text(
+            rail_x,
+            rail_top - 36,
+            text="WIND SPEED",
+            fill="#FFF6E2",
+            font=("Arial", 9, "bold"),
+            tags="wind_slider"
+        )
+
+        self.draw_rounded_rect(
+            rail_x - 42,
+            rail_top - 26,
+            rail_x + 42,
+            rail_top - 2,
+            12,
+            fill="#10242D",
+            outline="#E0B365",
+            width=1,
+            tags="wind_slider"
+        )
+
+        self.canvas.create_text(
+            rail_x,
+            rail_top - 14,
+            text=f"{self.wind_speed:.1f} kt",
+            fill="#F8E4B1",
+            font=("Arial", 11, "bold"),
+            tags="wind_slider"
+        )
+
+        # Track shadow and fill.
 
         self.canvas.create_line(
-            rail_x + 3,
+            rail_x + 4,
             rail_top,
-            rail_x + 3,
+            rail_x + 4,
             rail_bottom,
-            fill=BAMBOO_DARK,
-            width=11,
+            fill="#0F2028",
+            width=14,
             capstyle=tk.ROUND,
             tags="wind_slider"
         )
 
-        # ====================================================
-        # BAMBOO MAIN
-        # ====================================================
-
         self.canvas.create_line(
             rail_x,
             rail_top,
             rail_x,
             rail_bottom,
-            fill=BAMBOO,
+            fill="#B77B36",
             width=8,
             capstyle=tk.ROUND,
             tags="wind_slider"
         )
-
-        # ====================================================
-        # BAMBOO HIGHLIGHT
-        # ====================================================
 
         self.canvas.create_line(
             rail_x - 2,
             rail_top + 3,
             rail_x - 2,
             rail_bottom - 3,
-            fill=BAMBOO_LIGHT,
+            fill="#F2D69A",
             width=2,
             capstyle=tk.ROUND,
             tags="wind_slider"
         )
 
-        # ====================================================
-        # BAMBOO JOINTS
-        # ====================================================
+        # Filled wind column shows intensity.
 
-        for joint_fraction in (0.25, 0.50, 0.75):
-            y = (
-                    rail_top
-                    + joint_fraction
-                    * (rail_bottom - rail_top)
-            )
+        fill_top = knob_y
 
-            self.canvas.create_line(
-                rail_x - 6,
-                y,
-                rail_x + 6,
-                y,
-                fill=BAMBOO_DARK,
-                width=4,
-                capstyle=tk.ROUND,
-                tags="wind_slider"
-            )
+        self.canvas.create_line(
+            rail_x,
+            fill_top,
+            rail_x,
+            rail_bottom,
+            fill="#E4572E",
+            width=7,
+            capstyle=tk.ROUND,
+            tags="wind_slider"
+        )
 
-        # ====================================================
-        # WIND SPEED MARKERS
-        # ====================================================
+        # Accent ticks and labels.
 
         marker_values = [0, 10, 20, 30, 40]
 
@@ -1422,68 +1866,88 @@ class SurfApp(ctk.CTk):
                     * (rail_bottom - rail_top)
             )
 
-            # Small marker
-
             self.canvas.create_line(
-                rail_x + 10,
+                rail_x + 14,
                 marker_y,
-                rail_x + 16,
+                rail_x + 22,
                 marker_y,
-                fill=TEXT_LIGHT,
+                fill="#F8E4B1",
                 width=2,
                 tags="wind_slider"
             )
 
-            # Number
-
             self.canvas.create_text(
-                rail_x + 21,
+                rail_x + 30,
                 marker_y,
                 text=str(value),
                 anchor="w",
-                fill=TEXT_LIGHT,
+                fill="#FFF6E2",
                 font=("Arial", 8, "bold"),
                 tags="wind_slider"
             )
 
-        # ====================================================
-        # HANDLE SHADOW
-        # ====================================================
+        # Thumb shadow and thumb.
 
         self.canvas.create_oval(
-            rail_x - 13,
-            knob_y - 13,
-            rail_x + 13,
-            knob_y + 13,
-            fill="#4A2B16",
+            rail_x - 15 - pulse,
+            knob_y - 15 - pulse,
+            rail_x + 15 + pulse,
+            knob_y + 15 + pulse,
+            fill="#1A0F08",
             outline="",
             tags="wind_slider"
         )
 
-        # ====================================================
-        # HANDLE
-        # ====================================================
-
         self.canvas.create_oval(
-            rail_x - 10,
-            knob_y - 10,
-            rail_x + 10,
-            knob_y + 10,
-            fill="#E4572E",
-            outline=TEXT_LIGHT,
+            rail_x - 12,
+            knob_y - 12,
+            rail_x + 12,
+            knob_y + 12,
+            fill="#F2B44D",
+            outline="#FFF0CF",
             width=2,
             tags="wind_slider"
         )
 
-        # ====================================================
-        # LABEL
-        # ====================================================
+        self.canvas.create_oval(
+            rail_x - 6,
+            knob_y - 6,
+            rail_x + 6,
+            knob_y + 6,
+            fill="#E4572E",
+            outline="",
+            tags="wind_slider"
+        )
+
+        self.canvas.create_oval(
+            rail_x - 7,
+            knob_y - 11,
+            rail_x - 1,
+            knob_y - 5,
+            fill="#FFF3DC",
+            outline="",
+            tags="wind_slider"
+        )
+
+        # Bottom label.
+
+        self.draw_rounded_rect(
+            rail_x - 32,
+            rail_bottom + 16,
+            rail_x + 32,
+            rail_bottom + 40,
+            12,
+            fill="#10242D",
+            outline="#E0B365",
+            width=1,
+            tags="wind_slider"
+        )
 
         self.canvas.create_text(
             rail_x,
-            rail_bottom + 25,
+            rail_bottom + 28,
             text="WIND",
-            fill=TEXT_LIGHT,
+            fill="#FFF6E2",
             font=("Arial", 9, "bold"),
             tags="wind_slider"
         )
@@ -1491,6 +1955,23 @@ class SurfApp(ctk.CTk):
         # Keep slider visible
 
         self.canvas.tag_raise("wind_slider")
+
+    def animate_wind_cluster(self):
+
+        self.wind_pulse_phase += 0.12
+
+        self.canvas.delete("windsock")
+        self.canvas.delete("wind_slider")
+        self.canvas.delete("wind_cluster")
+
+        self.draw_wind_cluster_panel()
+        self.draw_windsock()
+        self.draw_wind_slider()
+
+        self.wind_animation_job = self.after(
+            90,
+            self.animate_wind_cluster
+        )
 
     # ========================================================
     # CHECK WHETHER MOUSE IS NEAR WIND SLIDER
@@ -1541,8 +2022,9 @@ class SurfApp(ctk.CTk):
                 * MAX_WIND_SPEED
         )
 
-        # Redraw
+        # Redraw both widgets so the wind indicator updates live
 
+        self.draw_windsock()
         self.draw_wind_slider()
 
     # ========================================================
@@ -1801,9 +2283,21 @@ class SurfApp(ctk.CTk):
 
         self.draw_compass()
 
+        self.canvas.delete("ui_panels")
+        self.spot_selector_window_id = None
+
+        self.draw_wind_cluster_panel()
+
         self.draw_windsock()
 
         self.draw_wind_slider()
+
+        self.draw_spot_card()
+
+        self.draw_verdict_card()
+
+        if self.wind_animation_job is None:
+            self.animate_wind_cluster()
 
     # ========================================================
     # RESIZE

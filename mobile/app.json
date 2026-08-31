@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "SurfKompas",
+    "slug": "surfkompas",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#f5efe3"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.surfkompas.app"
+    },
+    "android": {
+      "package": "com.surfkompas.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f5efe3"
+      }
+    }
+  }
+}

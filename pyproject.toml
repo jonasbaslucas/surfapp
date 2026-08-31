@@ -1,0 +1,8 @@
+[project]
+name = "surfapp"
+version = "0.1.0"
+description = "Surf conditions dashboard"
+requires-python = ">=3.12"
+dependencies = [
+    "Pillow>=10.0.0",
+]

@@ -1,0 +1,14 @@
+.venv/
+.uv-venv/
+.uv-cache/
+__pycache__/
+*.pyc
+.idea/
+node_modules/
+mobile/node_modules/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/npm-debug.log*
+mobile/.env
+dist/
+.DS_Store
