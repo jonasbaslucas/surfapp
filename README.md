@@ -49,6 +49,9 @@ Production branch: `codex/fix-windsock` for this pushed branch, or `main` after 
 If you connect Cloudflare Pages to GitHub, every push to the production branch
 will trigger a new deployment automatically.
 
+If Cloudflare is configured to run `npx wrangler deploy`, the repository also
+includes `wrangler.jsonc`, which points Wrangler at the static `site/` folder.
+
 ## Mobile app
 
 There is now a first Expo/React Native mobile version in `mobile/`.
