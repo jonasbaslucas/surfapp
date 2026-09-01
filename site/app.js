@@ -7,7 +7,7 @@ const i18n = {
     heroCopy: "Een mooie, rustige forecast voor Nederlandse surfers: kies een spot, check de komende week en zoom in op 06:00, 10:00, 14:00 of 18:00.",
     spotsLabel: "Surfspots",
     score: "score",
-    selectedWindow: "Gekozen surfraam",
+    selectedWindow: "Surfadvies",
     weekForecast: "Vandaag + 7 dagen",
     dayParts: "Dag verdeeld in 4 momenten",
     expertDetails: "Expert details",
@@ -43,7 +43,7 @@ const i18n = {
     heroCopy: "A clean forecast for Dutch surfers: choose a spot, scan the week, then zoom into 06:00, 10:00, 14:00 or 18:00.",
     spotsLabel: "Surf spots",
     score: "score",
-    selectedWindow: "Selected surf window",
+    selectedWindow: "Surf advice",
     weekForecast: "Today + 7 days",
     dayParts: "Day split into 4 moments",
     expertDetails: "Expert details",
@@ -185,9 +185,14 @@ async function loadForecast(spotId) {
   state.selectedDay = 0;
   state.selectedWindow = 0;
   els.vibeTitle.textContent = t("loading");
+  document.body.classList.add("is-loading");
   renderSpots();
-  state.forecast = await SurfKompasForecast.fetchForecastBundle(spotId);
-  render();
+  try {
+    state.forecast = await SurfKompasForecast.fetchForecastBundle(spotId);
+    render();
+  } finally {
+    document.body.classList.remove("is-loading");
+  }
 }
 
 function setMobileStep(step) {

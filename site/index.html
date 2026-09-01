@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SurfKompas</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=art1">
-  <link rel="stylesheet" href="/styles.css?v=art1">
+  <link rel="icon" type="image/png" href="/assets/surfkompas-compass-mark.png?v=art2">
+  <link rel="stylesheet" href="/styles.css?v=art2">
 </head>
 <body>
   <div class="ocean-lines" aria-hidden="true">
@@ -53,7 +53,6 @@
       </div>
       <input id="spotSearch" class="spot-search" type="search" placeholder="Zoek spot of regio">
       <div id="spotList" class="spot-list"></div>
-      <img class="spot-art-card" src="/assets/surfkompas-sticker-sheet.png?v=art1" alt="">
     </aside>
 
     <section class="forecast-area">
@@ -74,9 +73,14 @@
         <button id="backToDays" type="button" data-i18n="changeDay">Andere dag</button>
       </div>
 
+      <div class="surf-loader" aria-hidden="true">
+        <img src="/assets/surfkompas-van-loader.png?v=art2" alt="">
+        <span data-i18n="loading">Forecast laden...</span>
+      </div>
+
       <section class="today-card">
         <div>
-          <p class="section-kicker" data-i18n="selectedWindow">Gekozen surfraam</p>
+          <p class="section-kicker" data-i18n="selectedWindow">Surfadvies</p>
           <div class="advice-score">
             <span id="adviceScoreValue">--</span>
             <small data-i18n="score">score</small>
@@ -84,7 +88,7 @@
           <h3 id="vibeTitle">Even laden...</h3>
           <p id="vibeText"></p>
         </div>
-        <img class="poster-card" src="/assets/surfkompas-dawn-waves.png?v=art1" alt="">
+        <img class="poster-card" src="/assets/surfkompas-dawn-waves.png?v=art2" alt="">
       </section>
 
       <section class="week-section">
@@ -133,7 +137,7 @@
     </section>
   </main>
 
-  <script src="/forecast.js?v=art1"></script>
-  <script src="/app.js?v=art1"></script>
+  <script src="/forecast.js?v=art2"></script>
+  <script src="/app.js?v=art2"></script>
 </body>
 </html>
