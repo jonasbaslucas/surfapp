@@ -980,6 +980,9 @@ body.is-loading .surf-loader {
     position: relative;
     padding: 15px;
     box-shadow: 0 16px 34px rgba(111,73,35,.18);
+    max-height: min(430px, calc(100vh - 390px));
+    display: flex;
+    flex-direction: column;
   }
 
   .spot-panel::before {
@@ -1033,22 +1036,27 @@ body.is-loading .surf-loader {
   }
 
   .spot-search {
-    margin: 12px 0 13px;
-    padding: 13px 14px;
+    margin: 11px 0 12px;
+    padding: 11px 13px;
     border-radius: 18px;
     background: rgba(255,255,255,.82);
+    flex: 0 0 auto;
   }
 
   .spot-list {
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden;
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow-x: hidden;
+    overflow-y: auto;
     max-width: 100%;
-    gap: 10px;
-    padding: 2px 3px 7px;
-    scroll-snap-type: x mandatory;
-    overscroll-behavior-inline: contain;
+    max-height: 276px;
+    gap: 8px;
+    padding: 2px 4px 8px 1px;
+    scroll-snap-type: y proximity;
+    overscroll-behavior-block: contain;
+    touch-action: pan-y;
     scrollbar-width: none;
+    mask-image: linear-gradient(180deg, black 0, black calc(100% - 26px), transparent 100%);
   }
 
   .spot-list::-webkit-scrollbar {
@@ -1056,10 +1064,10 @@ body.is-loading .surf-loader {
   }
 
   .spot-button {
-    flex: 0 0 166px;
+    min-height: 58px;
     scroll-snap-align: start;
     border-radius: 18px;
-    padding: 13px;
+    padding: 10px 12px;
     background:
       linear-gradient(135deg, rgba(255,255,255,.86), rgba(247,191,85,.18)),
       rgba(255,250,240,.92);
