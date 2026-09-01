@@ -138,7 +138,7 @@ const SurfKompasForecast = (() => {
   }
 
   function scoreSwellHeight(item, height) {
-    if (height < item.minimum_swell_height) return [0, "Too small"];
+    if (height < item.minimum_swell_height) return [0, "Flat"];
     if (height < item.good_swell_height) return [10, "Small"];
     if (height < item.excellent_swell_height) return [20, "Good"];
     return [25, "Excellent"];
@@ -167,16 +167,16 @@ const SurfKompasForecast = (() => {
       swell_height_quality: swellHeightQuality,
       period_score: periodScore,
       period_quality: periodQuality,
-      verdict: totalScore >= 82 ? "Excellent" : totalScore >= 66 ? "Good" : totalScore >= 45 ? "Maybe" : "Small / messy",
+      verdict: totalScore >= 82 ? "Firing" : totalScore >= 66 ? "Fun" : totalScore >= 45 ? "Maybe" : "Small / Messy",
     };
   }
 
   function vibe(score) {
-    if (score >= 82) return { key: "excellent", nl: "Pak je board", en: "Grab your board", tone_nl: "Dit is zo'n raam waar je je dag omheen plant.", tone_en: "This is the kind of window you plan around." };
-    if (score >= 66) return { key: "good", nl: "Ziet er lekker uit", en: "Looks tasty", tone_nl: "Goede kans op een leuke sessie, met een paar details om te checken.", tone_en: "A fun session is on the table, with a few details to check." };
-    if (score >= 50) return { key: "maybe", nl: "Even goed timen", en: "Time it well", tone_nl: "Niet perfect, maar met het juiste moment kan het best leuk worden.", tone_en: "Not perfect, but the right window could be fun." };
-    if (score >= 35) return { key: "messy", nl: "Koffie en check later", en: "Coffee, then recheck", tone_nl: "Er zit misschien iets in, maar verwacht rommelige Noordzee.", tone_en: "There may be something in it, but expect messy North Sea surf." };
-    return { key: "quiet", nl: "Meer strandwandeling", en: "More beach walk", tone_nl: "Vandaag voelt zachter; leuk voor sfeer, minder voor echte push.", tone_en: "A softer beach day; nice atmosphere, less real push." };
+    if (score >= 82) return { key: "excellent", nl: "Board pakken", en: "Grab your board", tone_nl: "Dit is een echte go: goede push, nette richting en een raam om je dag omheen te plannen.", tone_en: "This is a proper go: good push, clean direction, and a window worth planning around." };
+    if (score >= 66) return { key: "good", nl: "Leuke sessie", en: "Fun session", tone_nl: "Ziet er surfbaar en leuk uit. Check de wind nog even, maar dit kan zeker de moeite zijn.", tone_en: "Looks surfable and fun. Check the wind once more, but this one is worth a look." };
+    if (score >= 50) return { key: "maybe", nl: "Goed timen", en: "Time it right", tone_nl: "Niet perfect, wel kans op wat ritjes als je het juiste moment pakt.", tone_en: "Not perfect, but there could be a few waves if you catch the right window." };
+    if (score >= 35) return { key: "messy", nl: "Check later", en: "Recheck later", tone_nl: "Er kan iets in zitten, maar verwacht rommelige Noordzee met weinig zekerheid.", tone_en: "There may be something in it, but expect messy North Sea surf with low confidence." };
+    return { key: "quiet", nl: "Rustige stranddag", en: "Quiet beach day", tone_nl: "Mooi voor koffie, kijken en sfeer. Minder voor echte push onder je board.", tone_en: "Good for coffee, checking the sea, and beach vibes. Less good for real push under your board." };
   }
 
   function wavePowerKwm(heightM, periodS) {
@@ -184,10 +184,10 @@ const SurfKompasForecast = (() => {
   }
 
   function energyLabel(power) {
-    if (power >= 12) return { nl: "veel power", en: "powerful" };
-    if (power >= 6) return { nl: "goede push", en: "good push" };
-    if (power >= 2) return { nl: "kleine push", en: "small push" };
-    return { nl: "weinig power", en: "low power" };
+    if (power >= 12) return { nl: "Veel power", en: "Powerful" };
+    if (power >= 6) return { nl: "Goede push", en: "Good push" };
+    if (power >= 2) return { nl: "Kleine push", en: "Small push" };
+    return { nl: "Weinig power", en: "Low power" };
   }
 
   function buildSnapshot(item, weather, marine, sampleTime, now, label) {

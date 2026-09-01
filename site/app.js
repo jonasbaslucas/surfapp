@@ -20,14 +20,14 @@ const i18n = {
     fallback: "Voorbeelddata",
     search: "Zoek spot of regio",
     best: "Beste moment",
-    gusts: "stoten",
-    period: "periode",
-    waves: "golven",
-    tide: "tij",
-    feels: "voelt als",
-    sea: "zee",
+    gusts: "Windstoten",
+    period: "Periode",
+    waves: "Golven",
+    tide: "Getij",
+    feels: "Voelt als",
+    sea: "Zee",
     sourcePrefix: "Bron",
-    energyExplain: "Geschatte deep-water swell power",
+    energyExplain: "Geschatte swellenergie in diep water",
     charmNorthSea: "Noordzee vibes",
     charmSevenDays: "8 dagen",
     charmFourWindows: "4 momenten",
@@ -55,14 +55,14 @@ const i18n = {
     fallback: "Sample data",
     search: "Search spot or region",
     best: "Best window",
-    gusts: "gusts",
-    period: "period",
-    waves: "waves",
-    tide: "tide",
-    feels: "feels",
-    sea: "sea",
+    gusts: "Gusts",
+    period: "Period",
+    waves: "Waves",
+    tide: "Tide",
+    feels: "Feels like",
+    sea: "Sea",
     sourcePrefix: "Source",
-    energyExplain: "Estimated deep-water swell power",
+    energyExplain: "Estimated deep-water swell energy",
     charmNorthSea: "North Sea vibes",
     charmSevenDays: "8 days",
     charmFourWindows: "4 windows",
@@ -92,6 +92,7 @@ const els = {
   spotName: document.querySelector("#spotName"),
   spotDescription: document.querySelector("#spotDescription"),
   scoreValue: document.querySelector("#scoreValue"),
+  adviceScoreValue: document.querySelector("#adviceScoreValue"),
   vibeTitle: document.querySelector("#vibeTitle"),
   vibeText: document.querySelector("#vibeText"),
   sourceNote: document.querySelector("#sourceNote"),
@@ -283,11 +284,13 @@ function render() {
   els.spotName.textContent = spot.name;
   els.spotDescription.textContent = spot.description;
   els.scoreValue.textContent = item.score;
+  els.adviceScoreValue.textContent = item.score;
   els.vibeTitle.textContent = local(item.vibe);
   els.vibeText.textContent = localTone(item.vibe);
   els.sourceNote.textContent = `${t("sourcePrefix")}: ${local(state.forecast.sourceNote)}`;
 
   document.querySelector(".score-medallion").className = `score-medallion ${scoreClass(item.score)} ${scoreTone(item.score)}`;
+  document.querySelector(".advice-score").className = `advice-score ${scoreTone(item.score)}`;
   renderDayRail();
   renderWindows();
   renderMetrics(item);

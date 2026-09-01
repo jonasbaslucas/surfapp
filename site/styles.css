@@ -498,6 +498,48 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.advice-score {
+  width: fit-content;
+  min-width: 86px;
+  margin: 10px 0 12px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  color: white;
+  background: radial-gradient(circle at 30% 24%, #6fc9d2, var(--sea) 60%, var(--deep));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 14px 30px rgba(20,127,143,.24);
+}
+
+.advice-score span {
+  display: inline-block;
+  font-size: 26px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.advice-score small {
+  margin-left: 5px;
+  color: rgba(255,255,255,.86);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.advice-score.score-excellent {
+  background: radial-gradient(circle at 30% 24%, #46c989, var(--score-excellent) 62%, #063d28);
+}
+
+.advice-score.score-good {
+  background: radial-gradient(circle at 30% 24%, #7ee6a8, var(--score-good) 62%, #1f7b52);
+}
+
+.advice-score.score-okay {
+  background: radial-gradient(circle at 30% 24%, #ffd274, var(--score-okay) 62%, #b96b12);
+}
+
+.advice-score.score-bad {
+  background: radial-gradient(circle at 30% 24%, #ff8a76, var(--score-bad) 62%, #9d2b25);
+}
+
 .today-card p:not(.section-kicker) {
   max-width: 560px;
   margin: 0;
