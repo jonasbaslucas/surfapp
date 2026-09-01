@@ -33,6 +33,7 @@ const i18n = {
     charmFourWindows: "4 momenten",
     changeSpot: "Andere spot",
     changeDay: "Andere dag",
+    kmh: "km/u",
   },
   en: {
     beginnerMode: "Kook",
@@ -68,6 +69,7 @@ const i18n = {
     charmFourWindows: "4 windows",
     changeSpot: "Change spot",
     changeDay: "Change day",
+    kmh: "km/h",
   },
 };
 
@@ -239,8 +241,8 @@ function renderMetrics(item) {
   els.swellMeta.textContent = `${item.swell.periodS}s ${t("period")} · ${t("waves")} ${item.waves.heightM} m`;
   els.energyValue.textContent = `${item.swell.energyKwm} kW/m`;
   els.energyMeta.textContent = `${local(item.swell.energyLabel)} · ${t("energyExplain")}`;
-  els.tempValue.textContent = `${item.weather.airTempC} C`;
-  els.tempMeta.textContent = `${t("feels")} ${item.weather.feelsLikeC} C · ${t("sea")} ${item.weather.seaTempC} C`;
+  els.tempValue.textContent = `${item.weather.airTempC} °C`;
+  els.tempMeta.textContent = `${t("feels")} ${item.weather.feelsLikeC} °C · ${t("sea")} ${item.weather.seaTempC} °C`;
 }
 
 function renderExpert(item) {
@@ -252,7 +254,7 @@ function renderExpert(item) {
     <div class="expert-item"><span>${t("swell")}</span><small>${b.swell_direction_score}/20 · ${b.swell_direction_quality}</small></div>
     <div class="expert-item"><span>${t("energy")}</span><small>${item.swell.energyKwm} kW/m · ${item.swell.periodS}s</small></div>
     <div class="expert-item"><span>${t("tide")}</span><small>${item.weather.tideM} m</small></div>
-    <div class="expert-item"><span>${t("gusts")}</span><small>${item.wind.gustKmh} km/u · ${item.wind.gustKt} kt</small></div>
+    <div class="expert-item"><span>${t("gusts")}</span><small>${item.wind.gustKmh} ${t("kmh")} · ${item.wind.gustKt} kt</small></div>
     <div class="expert-item"><span>${t("waves")}</span><small>${item.waves.heightM} m · ${item.waves.periodS}s · ${item.waves.direction}</small></div>
     <div class="expert-item"><span>Coords</span><small>${state.forecast.spot.latitude}, ${state.forecast.spot.longitude}</small></div>
     <div class="expert-item"><span>${t("score")}</span><small>${b.total_score}/100 · ${b.verdict}</small></div>
