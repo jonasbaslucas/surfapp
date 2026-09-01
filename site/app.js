@@ -93,6 +93,9 @@ const els = {
   statusLabel: document.querySelector("#statusLabel"),
   spotName: document.querySelector("#spotName"),
   spotDescription: document.querySelector("#spotDescription"),
+  liveWind: document.querySelector("#liveWind"),
+  liveSwell: document.querySelector("#liveSwell"),
+  liveEnergy: document.querySelector("#liveEnergy"),
   scoreValue: document.querySelector("#scoreValue"),
   adviceScoreValue: document.querySelector("#adviceScoreValue"),
   vibeTitle: document.querySelector("#vibeTitle"),
@@ -290,6 +293,9 @@ function render() {
   els.statusLabel.textContent = state.forecast.status === "live" ? t("live") : t("fallback");
   els.spotName.textContent = spot.name;
   els.spotDescription.textContent = spot.description;
+  els.liveWind.textContent = `${t("wind")}: ${item.wind.speedKt} kt ${item.wind.direction}`;
+  els.liveSwell.textContent = `${t("swell")}: ${item.swell.heightM} m · ${item.swell.periodS}s`;
+  els.liveEnergy.textContent = `${t("energy")}: ${item.swell.energyKwm} kW/m`;
   els.scoreValue.textContent = item.score;
   els.adviceScoreValue.textContent = item.score;
   els.vibeTitle.textContent = local(item.vibe);

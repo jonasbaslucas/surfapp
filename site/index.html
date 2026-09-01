@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SurfKompas</title>
-  <link rel="icon" type="image/png" href="/assets/surfkompas-compass-mark.png?v=art2">
-  <link rel="stylesheet" href="/styles.css?v=art2">
+  <link rel="icon" type="image/svg+xml" href="/assets/surfkompas-compass.svg?v=wave2">
+  <link rel="stylesheet" href="/styles.css?v=wave2">
 </head>
 <body>
   <div class="ocean-lines" aria-hidden="true">
@@ -61,6 +61,11 @@
           <p id="statusLabel" class="status-label">Live model</p>
           <h2 id="spotName">Kijkduin</h2>
           <p id="spotDescription"></p>
+          <div class="live-conditions" aria-label="Huidige condities">
+            <span id="liveWind">--</span>
+            <span id="liveSwell">--</span>
+            <span id="liveEnergy">--</span>
+          </div>
         </div>
         <div class="score-medallion">
           <span id="scoreValue">--</span>
@@ -137,7 +142,7 @@
     </section>
   </main>
 
-  <script src="/forecast.js?v=art2"></script>
-  <script src="/app.js?v=art2"></script>
+  <script src="/forecast.js?v=wave2"></script>
+  <script src="/app.js?v=wave2"></script>
 </body>
 </html>

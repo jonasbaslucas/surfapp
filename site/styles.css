@@ -121,15 +121,13 @@ input {
 }
 
 .brand-compass {
-  width: 28px;
-  height: 28px;
-  border: 2px solid rgba(255,255,255,.76);
+  width: 30px;
+  height: 30px;
+  border: 0;
   border-radius: 50%;
   display: inline-block;
   position: relative;
-  background:
-    radial-gradient(circle, rgba(255,250,240,.94), rgba(255,250,240,.8)),
-    url("/assets/surfkompas-compass-mark.png") center / 148% auto no-repeat;
+  background: url("/assets/surfkompas-compass.svg") center / contain no-repeat;
   box-shadow: 0 8px 18px rgba(5,21,29,.18);
 }
 
@@ -408,6 +406,49 @@ h1 {
   margin: 0;
   color: var(--muted);
   line-height: 1.45;
+}
+
+.selected-heading .status-label {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid rgba(20,127,143,.18);
+  border-radius: 999px;
+  color: var(--deep);
+  background: rgba(255,255,255,.68);
+  box-shadow: 0 8px 18px rgba(20,37,44,.06);
+}
+
+.selected-heading .status-label::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(71,185,140,.16);
+}
+
+.live-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.live-conditions span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 7px 10px;
+  border: 1px solid rgba(20,127,143,.16);
+  border-radius: 999px;
+  color: var(--deep);
+  background: rgba(255,255,255,.6);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(20,37,44,.06);
 }
 
 .score-medallion {
@@ -779,46 +820,29 @@ body.is-loading .surf-loader {
 .ocean-lines {
   position: fixed;
   inset: auto 0 0 0;
-  height: 120px;
+  height: 160px;
   z-index: 1;
   pointer-events: none;
-  opacity: .62;
+  opacity: .72;
   overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(245,239,227,0), rgba(245,239,227,.58) 42%, rgba(20,127,143,.16)),
+    url("/assets/surfkompas-dawn-waves.png") center 58% / cover no-repeat;
+  mask-image: linear-gradient(180deg, transparent, black 32%, black 100%);
 }
 
 .ocean-lines::before {
   content: "";
   position: absolute;
   inset: auto 0 0;
-  height: 42px;
-  background: linear-gradient(180deg, transparent, rgba(20,127,143,.12));
+  height: 70px;
+  background:
+    linear-gradient(180deg, transparent, rgba(15,89,101,.32)),
+    radial-gradient(ellipse at 50% 100%, rgba(255,250,240,.42), transparent 54%);
 }
 
 .ocean-lines span {
-  position: absolute;
-  left: -20%;
-  width: 140%;
-  height: 42px;
-  background:
-    radial-gradient(circle at 28px 100%, rgba(255,255,255,.62) 0 4px, transparent 5px) 0 0 / 58px 26px repeat-x,
-    linear-gradient(180deg, rgba(20,127,143,.45), rgba(20,127,143,0));
-  animation: wave-drift 16s linear infinite;
-}
-
-.ocean-lines span:nth-child(1) {
-  bottom: 54px;
-}
-
-.ocean-lines span:nth-child(2) {
-  bottom: 30px;
-  opacity: .64;
-  animation-duration: 22s;
-}
-
-.ocean-lines span:nth-child(3) {
-  bottom: 10px;
-  opacity: .42;
-  animation-duration: 28s;
+  display: none;
 }
 
 @keyframes wave-drift {
@@ -883,8 +907,8 @@ body.is-loading .surf-loader {
   }
 
   .brand-compass {
-    width: 19px;
-    height: 19px;
+    width: 26px;
+    height: 26px;
   }
 
   .toolbar {
@@ -1090,30 +1114,60 @@ body.is-loading .surf-loader {
 
   .selected-heading {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
     align-items: start;
-    gap: 12px;
-    padding: 2px 2px 6px;
+    gap: 13px;
+    padding: 16px;
+    border: 1px solid rgba(20,127,143,.14);
+    border-radius: 24px;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.86), rgba(255,244,216,.78)),
+      radial-gradient(circle at 100% 0, rgba(20,127,143,.12), transparent 42%);
+    box-shadow: 0 14px 28px rgba(20,37,44,.08);
   }
 
   .selected-heading h2 {
     margin-top: 6px;
-    font-size: clamp(30px, 8vw, 38px);
+    font-size: clamp(25px, 7vw, 32px);
   }
 
   .selected-heading p:last-child {
-    font-size: 14px;
-    line-height: 1.45;
+    font-size: 12.5px;
+    line-height: 1.38;
   }
 
   .score-medallion {
-    width: 74px;
-    height: 74px;
-    outline-width: 5px;
+    width: fit-content;
+    height: auto;
+    min-width: 90px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    place-items: start;
+    outline: 0;
+    justify-self: start;
   }
 
   .score-medallion span {
-    font-size: 29px;
+    display: inline;
+    font-size: 25px;
+    line-height: 1;
+  }
+
+  .score-medallion small {
+    margin-left: 5px;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  .live-conditions {
+    gap: 6px;
+    margin-top: 11px;
+  }
+
+  .live-conditions span {
+    min-height: 27px;
+    padding: 6px 8px;
+    font-size: 11px;
   }
 
   .today-card {
@@ -1272,8 +1326,8 @@ body.is-loading .surf-loader {
   }
 
   .ocean-lines {
-    height: 92px;
-    opacity: .5;
+    height: 110px;
+    opacity: .6;
   }
 }
 
@@ -1310,11 +1364,6 @@ body.is-loading .surf-loader {
 
   .selected-heading {
     grid-template-columns: 1fr;
-  }
-
-  .score-medallion {
-    width: 70px;
-    height: 70px;
   }
 
   .window-grid,
