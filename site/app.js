@@ -11,6 +11,10 @@ const i18n = {
     weekForecast: "Vandaag + 7 dagen",
     dayParts: "Dag verdeeld in 4 momenten",
     expertDetails: "Expert details",
+    proWhy: "Waarom deze score?",
+    proSpot: "Spotgevoel",
+    proGear: "Board & level",
+    proData: "Extra data",
     wind: "Wind",
     swell: "Swell",
     energy: "Swellenergie",
@@ -47,6 +51,10 @@ const i18n = {
     weekForecast: "Today + 7 days",
     dayParts: "Day split into 4 moments",
     expertDetails: "Expert details",
+    proWhy: "Why this score?",
+    proSpot: "Spot read",
+    proGear: "Board & level",
+    proData: "Extra data",
     wind: "Wind",
     swell: "Swell",
     energy: "Swell energy",
@@ -112,7 +120,7 @@ const els = {
   energyMeta: document.querySelector("#energyMeta"),
   tempValue: document.querySelector("#tempValue"),
   tempMeta: document.querySelector("#tempMeta"),
-  expertToggle: document.querySelector("#expertToggle"),
+  expertToggles: document.querySelectorAll("[data-mode-toggle]"),
   expertPanel: document.querySelector("#expertPanel"),
   expertGrid: document.querySelector("#expertGrid"),
   backToSpots: document.querySelector("#backToSpots"),
@@ -144,8 +152,16 @@ function setLanguage(lang) {
   });
   els.brandWord.textContent = lang === "nl" ? "SurfKompas" : "SurfCompass";
   els.spotSearch.placeholder = t("search");
-  els.expertToggle.querySelector("span").textContent = state.expert ? t("expertMode") : t("beginnerMode");
+  syncExpertToggles();
   render();
+}
+
+function syncExpertToggles() {
+  els.expertToggles.forEach((button) => {
+    button.classList.toggle("active", state.expert);
+    button.setAttribute("aria-pressed", String(state.expert));
+    button.querySelector("span").textContent = state.expert ? t("expertMode") : t("beginnerMode");
+  });
 }
 
 function scoreClass(score) {
@@ -253,19 +269,72 @@ function renderMetrics(item) {
   els.tempMeta.textContent = `${t("feels")} ${item.weather.feelsLikeC} °C · ${t("sea")} ${item.weather.seaTempC} °C`;
 }
 
+function qualityLabel(value) {
+  const labels = {
+    Excellent: { nl: "Top", en: "Excellent" },
+    Good: { nl: "Goed", en: "Good" },
+    Okay: { nl: "Oké", en: "Okay" },
+    Poor: { nl: "Matig", en: "Poor" },
+    Unknown: { nl: "Onzeker", en: "Unknown" },
+    Flat: { nl: "Vlak", en: "Flat" },
+    Small: { nl: "Klein", en: "Small" },
+    "Too short": { nl: "Korte periode", en: "Short period" },
+    Short: { nl: "Kort", en: "Short" },
+  };
+  return local(labels[value] || { nl: value, en: value });
+}
+
+function proBreakdownText(item) {
+  const b = item.breakdown;
+  const parts = [
+    `${t("wind")} ${b.wind_score}/30 (${qualityLabel(b.wind_quality)})`,
+    `${t("swell")} ${b.swell_direction_score + b.swell_height_score}/45 (${qualityLabel(b.swell_direction_quality)}, ${qualityLabel(b.swell_height_quality)})`,
+    `${t("period")} ${b.period_score}/25 (${qualityLabel(b.period_quality)})`,
+  ];
+  return parts.join(" · ");
+}
+
+function proSpotText(item) {
+  const spot = state.forecast.spot;
+  const b = item.breakdown;
+  if (state.lang === "nl") {
+    if (b.wind_score >= 24 && b.swell_direction_score >= 14) return `${spot.name} ligt mooi voor deze combinatie: wind en swell staan allebei redelijk gunstig.`;
+    if (b.wind_score < 15 && b.swell_direction_score >= 14) return `${spot.name} krijgt wel swell, maar de wind maakt het waarschijnlijk rommeliger.`;
+    if (b.wind_score >= 24 && b.swell_height_score < 10) return `De wind helpt, maar er zit weinig formaat in de swell voor ${spot.name}.`;
+    return `${spot.name} kan werken, maar het hangt vooral af van lokale banken en getij.`;
+  }
+  if (b.wind_score >= 24 && b.swell_direction_score >= 14) return `${spot.name} lines up well for this mix: wind and swell are both fairly friendly.`;
+  if (b.wind_score < 15 && b.swell_direction_score >= 14) return `${spot.name} has swell, but the wind probably makes it messier.`;
+  if (b.wind_score >= 24 && b.swell_height_score < 10) return `The wind helps, but the swell size is light for ${spot.name}.`;
+  return `${spot.name} could work, but local banks and tide will matter most.`;
+}
+
+function proGearText(item) {
+  const score = item.score;
+  const height = item.swell.heightM;
+  const wind = item.wind.speedKt;
+  if (state.lang === "nl") {
+    if (score >= 82 && height >= 1.1) return "Shortboard kan. Voor beginners alleen relaxed als je comfortabel bent met drukte en stroming.";
+    if (score >= 66) return "Fish, midlength of funboard voelt logisch. Kook-modus: rustig instappen en setjes afwachten.";
+    if (height < 0.6) return "Longboard, foamie of gewoon chill strandcheck. Verwacht weinig push onder je board.";
+    if (wind > 20) return "Meer voor ervaren surfers: neem volume mee en verwacht chop, drift en harde paddles.";
+    return "Funboard of midlength is de veilige keuze. Verwacht korte Noordzee-ritjes.";
+  }
+  if (score >= 82 && height >= 1.1) return "Shortboard can work. Beginners: only mellow if you are comfortable with current and crowds.";
+  if (score >= 66) return "Fish, midlength or funboard makes sense. Kook mode: ease in and wait for sets.";
+  if (height < 0.6) return "Longboard, foamie or just a beach check. Expect limited push under your board.";
+  if (wind > 20) return "More experienced-only: bring volume and expect chop, drift and harder paddles.";
+  return "Funboard or midlength is the safe call. Expect short North Sea rides.";
+}
+
 function renderExpert(item) {
   els.expertPanel.hidden = !state.expert;
   if (!state.expert) return;
-  const b = item.breakdown;
   els.expertGrid.innerHTML = `
-    <div class="expert-item"><span>${t("wind")}</span><small>${b.wind_score}/30 · ${b.wind_quality}</small></div>
-    <div class="expert-item"><span>${t("swell")}</span><small>${b.swell_direction_score}/20 · ${b.swell_direction_quality}</small></div>
-    <div class="expert-item"><span>${t("energy")}</span><small>${item.swell.energyKwm} kW/m · ${item.swell.periodS}s</small></div>
-    <div class="expert-item"><span>${t("tide")}</span><small>${item.weather.tideM} m</small></div>
-    <div class="expert-item"><span>${t("gusts")}</span><small>${item.wind.gustKmh} ${t("kmh")} · ${item.wind.gustKt} kt</small></div>
-    <div class="expert-item"><span>${t("waves")}</span><small>${item.waves.heightM} m · ${item.waves.periodS}s · ${item.waves.direction}</small></div>
-    <div class="expert-item"><span>Coords</span><small>${state.forecast.spot.latitude}, ${state.forecast.spot.longitude}</small></div>
-    <div class="expert-item"><span>${t("score")}</span><small>${b.total_score}/100 · ${b.verdict}</small></div>
+    <div class="expert-item"><span>${t("proWhy")}</span><small>${proBreakdownText(item)}</small></div>
+    <div class="expert-item"><span>${t("proSpot")}</span><small>${proSpotText(item)}</small></div>
+    <div class="expert-item"><span>${t("proGear")}</span><small>${proGearText(item)}</small></div>
+    <div class="expert-item"><span>${t("proData")}</span><small>${t("tide")} ${item.weather.tideM} m · ${t("gusts")} ${item.wind.gustKmh} ${t("kmh")} · ${t("waves")} ${item.waves.periodS}s ${item.waves.direction}</small></div>
   `;
 }
 
@@ -314,12 +383,12 @@ document.querySelectorAll("[data-lang]").forEach((button) => {
   button.addEventListener("click", () => setLanguage(button.dataset.lang));
 });
 
-els.expertToggle.addEventListener("click", () => {
-  state.expert = !state.expert;
-  els.expertToggle.classList.toggle("active", state.expert);
-  els.expertToggle.setAttribute("aria-pressed", String(state.expert));
-  els.expertToggle.querySelector("span").textContent = state.expert ? t("expertMode") : t("beginnerMode");
-  render();
+els.expertToggles.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.expert = !state.expert;
+    syncExpertToggles();
+    render();
+  });
 });
 
 els.spotSearch.addEventListener("input", renderSpots);
