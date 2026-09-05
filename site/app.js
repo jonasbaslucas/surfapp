@@ -26,9 +26,9 @@ const i18n = {
     dayParts: "Dag verdeeld in 4 momenten",
     expertDetails: "Expert details",
     proWhy: "Waarom deze score?",
-    proSpot: "Spotgevoel",
-    proGear: "Board & level",
-    proData: "Extra data",
+    proSpot: "Spotanalyse",
+    proGear: "Technische kern",
+    proData: "Veiligheidscheck",
     wind: "Wind",
     swell: "Swell",
     energy: "Swellenergie",
@@ -81,8 +81,8 @@ const i18n = {
     expertDetails: "Expert details",
     proWhy: "Why this score?",
     proSpot: "Spot read",
-    proGear: "Board & level",
-    proData: "Extra data",
+    proGear: "Technical core",
+    proData: "Safety check",
     wind: "Wind",
     swell: "Swell",
     energy: "Swell energy",
@@ -301,6 +301,7 @@ function setActivity(activity) {
   state.forecast = null;
   state.recommendation = null;
   state.selectedSpot = null;
+  document.body.classList.remove("only-sport");
   setMobileStep("spots");
   loadSpots();
 }
@@ -376,6 +377,11 @@ function qualityLabel(value) {
 }
 
 function proBreakdownText(item) {
+  if (state.activity === "kite" || state.activity === "windsurf") {
+    const spread = Math.max(0, item.wind.gustKt - item.wind.speedKt).toFixed(1);
+    const windWord = state.activity === "kite" ? (item.wind.speedKt < 14 ? "light" : item.wind.speedKt > 28 ? "strong" : "workable") : (item.wind.speedKt < 12 ? "light" : item.wind.speedKt > 30 ? "strong" : "sailable");
+    return `${t("wind")} ${item.wind.speedKt} kt (${windWord}) · ${t("gusts")} +${spread} kt · ${item.wind.direction} · ${t("waves")} ${item.waves.heightM} m`;
+  }
   const b = item.breakdown;
   const parts = [
     `${t("wind")} ${b.wind_score}/30 (${qualityLabel(b.wind_quality)})`,
@@ -388,6 +394,16 @@ function proBreakdownText(item) {
 function proSpotText(item) {
   const spot = state.forecast.spot;
   const b = item.breakdown;
+  if (state.activity === "kite") {
+    if (b.wind_score <= 4) return state.lang === "nl" ? `${spot.name} werkt niet goed met deze windrichting; controleer de lokale spotregels.` : `${spot.name} is not a good match for this wind direction; check local spot rules.`;
+    if (b.period_score < 12) return state.lang === "nl" ? `${spot.name} heeft vandaag relatief vlak water: fijn voor controle, minder voor golfrijden.` : `${spot.name} is relatively flat today: good for control, less for wave riding.`;
+    return state.lang === "nl" ? `${spot.name} krijgt een bruikbare combinatie van wind en water. Let vooral op vlagen en ruimte bij de launch.` : `${spot.name} has a workable mix of wind and water. Watch gusts and launch space.`;
+  }
+  if (state.activity === "windsurf") {
+    if (b.wind_score <= 4) return state.lang === "nl" ? `${spot.name} staat niet mooi voor deze windrichting; kies een spot met meer beschutting.` : `${spot.name} is not well aligned with this wind; choose a more sheltered spot.`;
+    if (b.period_score < 12) return state.lang === "nl" ? `${spot.name} houdt het water relatief vlak: prettig voor freeride en oefenen.` : `${spot.name} keeps the water relatively flat: useful for freeride and practice.`;
+    return state.lang === "nl" ? `${spot.name} combineert vandaag genoeg wind met bruikbaar water voor een compacte sessie.` : `${spot.name} combines enough wind with usable water for a focused session.`;
+  }
   if (state.lang === "nl") {
     if (b.wind_score >= 24 && b.swell_direction_score >= 14) return `${spot.name} ligt mooi voor deze combinatie: wind en swell staan allebei redelijk gunstig.`;
     if (b.wind_score < 15 && b.swell_direction_score >= 14) return `${spot.name} krijgt wel swell, maar de wind maakt het waarschijnlijk rommeliger.`;
@@ -401,6 +417,16 @@ function proSpotText(item) {
 }
 
 function proGearText(item) {
+  if (state.activity === "kite") {
+    return state.lang === "nl"
+      ? `Wind ${item.wind.speedKt} kt, vlagen ${item.wind.gustKt} kt · richting ${item.wind.direction} · golf ${item.waves.heightM} m.`
+      : `Wind ${item.wind.speedKt} kt, gusts ${item.wind.gustKt} kt · direction ${item.wind.direction} · wave ${item.waves.heightM} m.`;
+  }
+  if (state.activity === "windsurf") {
+    return state.lang === "nl"
+      ? `Wind ${item.wind.speedKt} kt, vlagen ${item.wind.gustKt} kt · richting ${item.wind.direction} · water ${item.waves.heightM} m.`
+      : `Wind ${item.wind.speedKt} kt, gusts ${item.wind.gustKt} kt · direction ${item.wind.direction} · water ${item.waves.heightM} m.`;
+  }
   const score = item.score;
   const height = item.swell.heightM;
   const wind = item.wind.speedKt;
@@ -425,8 +451,19 @@ function renderExpert(item) {
     <div class="expert-item"><span>${t("proWhy")}</span><small>${proBreakdownText(item)}</small></div>
     <div class="expert-item"><span>${t("proSpot")}</span><small>${proSpotText(item)}</small></div>
     <div class="expert-item"><span>${t("proGear")}</span><small>${proGearText(item)}</small></div>
-    <div class="expert-item"><span>${t("proData")}</span><small>${t("tide")} ${item.weather.tideM} m · ${t("gusts")} ${item.wind.gustKmh} ${t("kmh")} · ${t("waves")} ${item.waves.periodS}s ${item.waves.direction}</small></div>
+    <div class="expert-item"><span>${t("proData")}</span><small>${safetyText(item)} · ${t("tide")} ${item.weather.tideM} m · ${t("gusts")} ${item.wind.gustKmh} ${t("kmh")}</small></div>
   `;
+}
+
+function safetyText(item) {
+  if (state.activity === "kite" || state.activity === "windsurf") {
+    if (item.breakdown.wind_score <= 4) return state.lang === "nl" ? "Windrichting niet geschikt" : "Wind direction not suitable";
+    if (item.wind.gustKt - item.wind.speedKt >= 10) return state.lang === "nl" ? "Grote vlaagspreiding" : "Large gust spread";
+    return state.lang === "nl" ? "Geen zware waarschuwing in dit model" : "No strong warning in this model";
+  }
+  if (item.score < 35) return state.lang === "nl" ? "Weinig betrouwbare surfenergie" : "Low reliable surf energy";
+  if (item.score < 55) return state.lang === "nl" ? "Timing en lokale check belangrijk" : "Timing and a local check matter";
+  return state.lang === "nl" ? "Geen zware waarschuwing in dit model" : "No strong warning in this model";
 }
 
 function isMobileFlow() {
@@ -456,7 +493,7 @@ function render() {
   els.liveWind.textContent = `${t("wind")}: ${item.wind.speedKt} kt ${item.wind.direction}`;
   els.liveSwell.textContent = `${t("swell")}: ${item.swell.heightM} m · ${item.swell.periodS}s`;
   els.liveEnergy.textContent = `${t("energy")}: ${item.swell.energyKwm} kW/m`;
-  const safetyKey = item.score < 35 ? "safetyStrong" : item.score < 55 ? "safetyCaution" : "safetyGood";
+  const safetyKey = (state.activity === "kite" || state.activity === "windsurf") && item.breakdown.wind_score <= 4 ? "safetyStrong" : (item.score < 35 || item.wind.gustKt - item.wind.speedKt >= 10) ? "safetyCaution" : "safetyGood";
   els.safetyStatus.textContent = `${t("safety")}: ${t(safetyKey)}`;
   els.safetyStatus.className = `safety-status ${item.score < 35 ? "is-strong" : item.score < 55 ? "is-caution" : "is-good"}`;
   els.scoreValue.textContent = item.score;
@@ -540,5 +577,6 @@ els.backToDays.addEventListener("click", () => {
 });
 
 setMobileStep("spots");
+document.body.classList.add("only-sport");
 setLanguage("nl");
 renderActivities();

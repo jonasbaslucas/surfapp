@@ -260,6 +260,7 @@ const SurfKompasForecast = (() => {
     const score = breakdown.total_score;
 
     return {
+      activity: item.activity || "surf",
       time: sampleTime.toISOString(),
       hour: label,
       date: sampleTime.toISOString().slice(0, 10),
