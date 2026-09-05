@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SurfKompas</title>
-  <link rel="icon" type="image/svg+xml" href="/assets/surfkompas-compass.svg?v=wave5">
-  <link rel="stylesheet" href="/styles.css?v=wave6">
+  <link rel="icon" type="image/svg+xml" href="/assets/surfkompas-compass.svg?v=wave7">
+  <link rel="stylesheet" href="/styles.css?v=wave7">
 </head>
 <body>
   <div class="ocean-lines" aria-hidden="true">
@@ -63,7 +63,7 @@
     </div>
   </section>
 
-  <main class="app-shell">
+  <main class="app-shell" id="appShell" hidden>
     <aside class="spot-panel" aria-label="Surfspots">
       <div class="panel-heading">
         <p data-i18n="spotsLabel">Surfspots</p>
@@ -73,11 +73,11 @@
       <div id="spotList" class="spot-list"></div>
     </aside>
 
-    <section class="forecast-area">
+    <section class="forecast-area" id="forecastArea" hidden>
       <div class="selected-heading">
         <div>
           <p id="statusLabel" class="status-label">Live model</p>
-          <h2 id="spotName">Kijkduin</h2>
+          <h2 id="spotName">Kies een spot</h2>
           <p id="spotDescription"></p>
           <div class="live-conditions" aria-label="Huidige condities">
             <span id="liveWind">--</span>
@@ -91,9 +91,10 @@
             <span id="scoreValue">--</span>
             <small data-i18n="score">score</small>
           </div>
-          <button class="mode-toggle desktop-mode-toggle" type="button" data-mode-toggle aria-pressed="false">
-            <span data-i18n="beginnerMode">Kook</span>
-          </button>
+          <div class="mode-switch desktop-mode-toggle" role="group" aria-label="Surfmodus">
+            <button type="button" data-mode-option="kook" aria-pressed="true" data-i18n="beginnerMode">Kustkook</button>
+            <button type="button" data-mode-option="pro" aria-pressed="false" data-i18n="expertMode">Spotpro</button>
+          </div>
         </div>
       </div>
 
@@ -109,9 +110,10 @@
       <div class="mobile-flow-actions" aria-label="Mobiele navigatie">
         <button id="backToSpots" type="button" data-i18n="changeSpot">Andere spot</button>
         <button id="backToDays" type="button" data-i18n="changeDay">Andere dag</button>
-        <button class="mode-toggle mobile-mode-toggle" type="button" data-mode-toggle aria-pressed="false">
-          <span data-i18n="beginnerMode">Kook</span>
-        </button>
+        <div class="mode-switch mobile-mode-toggle" role="group" aria-label="Surfmodus">
+          <button type="button" data-mode-option="kook" aria-pressed="true" data-i18n="beginnerMode">Kustkook</button>
+          <button type="button" data-mode-option="pro" aria-pressed="false" data-i18n="expertMode">Spotpro</button>
+        </div>
       </div>
 
       <div class="surf-loader" aria-hidden="true">
@@ -178,7 +180,7 @@
     </section>
   </main>
 
-  <script src="/forecast.js?v=wave6"></script>
-  <script src="/app.js?v=wave6"></script>
+  <script src="/forecast.js?v=wave7"></script>
+  <script src="/app.js?v=wave7"></script>
 </body>
 </html>

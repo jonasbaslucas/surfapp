@@ -262,9 +262,9 @@ h1 {
 .activity-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
 .activity-card { position:relative; min-height:180px; overflow:hidden; display:flex; align-items:flex-end; text-align:left; border:1px solid rgba(255,255,255,.18); border-radius:18px; padding:0; color:#f6fbfb; background:#12394c; cursor:pointer; transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
 .activity-card:hover, .activity-card.active { transform:translateY(-3px); border-color:#f6b85b; box-shadow:0 12px 28px rgba(0,0,0,.24); }
-.activity-card-art { position:absolute; inset:0; background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.82) 100%), url('/assets/surfkompas-activity-trio.png?v=wave6'); background-size:300% 145%; background-repeat:no-repeat; background-position:0% 50%; }
-.activity-kite .activity-card-art { background-position:50% 50%; }
-.activity-wind .activity-card-art { background-position:100% 50%; }
+.activity-card-art { position:absolute; inset:0; background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-surf.png?v=wave7'); background-size:cover; background-position:center; }
+.activity-kite .activity-card-art { background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-kite.png?v=wave7'); }
+.activity-wind .activity-card-art { background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-windsurf.png?v=wave7'); }
 .activity-card-copy { position:relative; z-index:1; display:grid; gap:3px; padding:16px; }
 .activity-card-copy strong { font-size:1.1rem; letter-spacing:-.02em; }
 .activity-card-copy small { color:rgba(255,255,255,.72); font-size:.8rem; }
@@ -276,6 +276,9 @@ h1 {
 .safety-status.is-good { background:rgba(98,196,139,.16); color:#9ce6b9; }
 .safety-status.is-caution { background:rgba(246,184,91,.18); color:#ffd38b; }
 .safety-status.is-strong { background:rgba(255,109,103,.18); color:#ffaaa5; }
+.mode-switch { display:inline-flex; gap:3px; padding:3px; border:1px solid rgba(24,66,82,.18); border-radius:999px; background:rgba(22,64,80,.08); }
+.mode-switch button { border:0; border-radius:999px; padding:7px 11px; background:transparent; color:#53717a; font:inherit; font-size:.76rem; font-weight:850; cursor:pointer; }
+.mode-switch button[aria-pressed="true"] { background:#0b3d52; color:#fff8eb; box-shadow:0 4px 10px rgba(6,43,58,.18); }
 
 .app-shell {
   position: relative;
@@ -1558,14 +1561,13 @@ body.is-loading .surf-loader {
     display: inline-flex;
   }
 
-  .mobile-flow-actions .mode-toggle {
+  .mobile-flow-actions .mode-switch {
     margin-left: auto;
-    color: var(--deep);
     background: rgba(255,250,240,.82);
     border-color: rgba(20,127,143,.16);
   }
 
-  .mobile-flow-actions .mode-toggle.active {
+  .mobile-flow-actions .mode-switch button[aria-pressed="true"] {
     color: white;
     background: linear-gradient(135deg, var(--deep), var(--sea));
   }

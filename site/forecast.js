@@ -350,8 +350,8 @@ const SurfKompasForecast = (() => {
       windows,
       best: [...daily].sort((a, b) => b.score - a.score)[0],
       sourceNote: {
-        nl: "Offline voorbeelddata. Verbind met internet voor live modeldata.",
-        en: "Offline sample data. Connect to the internet for live model data.",
+        nl: "Offline voorbeelddata. Live model: Open-Meteo. Spotprofiel: Nederlandse publieke spotinformatie.",
+        en: "Offline sample data. Live model: Open-Meteo. Spot profile: public Dutch spot information.",
       },
     };
   }
@@ -419,8 +419,16 @@ const SurfKompasForecast = (() => {
         windows,
         best: [...daily].sort((a, b) => b.score - a.score)[0],
         sourceNote: {
-          nl: "Live Open-Meteo modeldata. Nabije stranden kunnen dezelfde golf-gridcel delen.",
-          en: "Live Open-Meteo model data. Nearby beaches can share the same wave-grid cell.",
+          nl: item.activity === "kite"
+            ? "Live Open-Meteo wind- en marinedata. Spotrichting en veiligheid afgestemd op NKV-spotinformatie."
+            : item.activity === "windsurf"
+              ? "Live Open-Meteo wind- en marinedata. Zee- en binnenwaterspots samengesteld uit publieke windsurfspotinformatie."
+              : "Live Open-Meteo golf-, swell- en getijdata. Nabije stranden kunnen dezelfde golf-gridcel delen.",
+          en: item.activity === "kite"
+            ? "Live Open-Meteo wind and marine data. Spot direction and safety aligned with NKV spot information."
+            : item.activity === "windsurf"
+              ? "Live Open-Meteo wind and marine data. Coastal and inland spots built from public windsurf spot information."
+              : "Live Open-Meteo wave, swell and tide data. Nearby beaches can share the same wave grid cell.",
         },
       };
       cache.set(cacheKey, { cachedAt: Date.now(), payload });

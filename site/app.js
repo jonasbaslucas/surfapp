@@ -111,7 +111,7 @@ const i18n = {
 
 let state = {
   lang: "nl",
-  activity: "surf",
+  activity: null,
   expert: false,
   spots: [],
   selectedSpot: null,
@@ -151,7 +151,7 @@ const els = {
   energyMeta: document.querySelector("#energyMeta"),
   tempValue: document.querySelector("#tempValue"),
   tempMeta: document.querySelector("#tempMeta"),
-  expertToggles: document.querySelectorAll("[data-mode-toggle]"),
+  modeOptions: document.querySelectorAll("[data-mode-option]"),
   expertPanel: document.querySelector("#expertPanel"),
   expertGrid: document.querySelector("#expertGrid"),
   backToSpots: document.querySelector("#backToSpots"),
@@ -161,6 +161,8 @@ const els = {
   recommendationName: document.querySelector("#recommendationName"),
   recommendationText: document.querySelector("#recommendationText"),
   useRecommendation: document.querySelector("#useRecommendation"),
+  appShell: document.querySelector("#appShell"),
+  forecastArea: document.querySelector("#forecastArea"),
 };
 
 function t(key) {
@@ -193,10 +195,10 @@ function setLanguage(lang) {
 }
 
 function syncExpertToggles() {
-  els.expertToggles.forEach((button) => {
-    button.classList.toggle("active", state.expert);
-    button.setAttribute("aria-pressed", String(state.expert));
-    button.querySelector("span").textContent = state.expert ? t("expertMode") : t("beginnerMode");
+  els.modeOptions.forEach((button) => {
+    const isPro = button.dataset.modeOption === "pro";
+    button.setAttribute("aria-pressed", String(isPro === state.expert));
+    button.textContent = isPro ? t("expertMode") : t("beginnerMode");
   });
 }
 
@@ -238,13 +240,17 @@ function renderActivities() {
 }
 
 async function loadSpots() {
+  if (!state.activity) return;
   state.spots = SurfKompasForecast.getSpots(state.activity);
-  state.selectedSpot = SurfKompasForecast.defaultSpotFor(state.activity);
+  state.selectedSpot = null;
+  els.appShell.hidden = false;
+  els.forecastArea.hidden = true;
   renderSpots();
   renderActivities();
 }
 
 async function loadForecast(spotId) {
+  if (!state.activity || !spotId) return;
   state.selectedSpot = spotId;
   state.selectedDay = 0;
   state.selectedWindow = 0;
@@ -253,6 +259,7 @@ async function loadForecast(spotId) {
   renderSpots();
   try {
     state.forecast = await SurfKompasForecast.fetchForecastBundle(spotId, state.activity);
+    els.forecastArea.hidden = false;
     render();
   } finally {
     document.body.classList.remove("is-loading");
@@ -289,12 +296,13 @@ function renderRecommendation() {
 }
 
 function setActivity(activity) {
-  if (activity === state.activity) return;
+  if (activity === state.activity && state.spots.length) return;
   state.activity = activity;
   state.forecast = null;
   state.recommendation = null;
+  state.selectedSpot = null;
   setMobileStep("spots");
-  loadSpots().then(() => loadForecast(state.selectedSpot)).then(refreshRecommendation);
+  loadSpots();
 }
 
 function setMobileStep(step) {
@@ -470,11 +478,11 @@ document.querySelectorAll("[data-lang]").forEach((button) => {
   button.addEventListener("click", () => setLanguage(button.dataset.lang));
 });
 
-els.expertToggles.forEach((button) => {
+els.modeOptions.forEach((button) => {
   button.addEventListener("click", () => {
-    state.expert = !state.expert;
+    state.expert = button.dataset.modeOption === "pro";
     syncExpertToggles();
-    render();
+    if (state.forecast) render();
   });
 });
 
@@ -496,7 +504,7 @@ els.spotList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-spot]");
   if (!button) return;
   setMobileStep("days");
-  loadForecast(button.dataset.spot);
+  loadForecast(button.dataset.spot).then(refreshRecommendation);
   nudgeMobileTo(".forecast-area");
 });
 
@@ -533,4 +541,4 @@ els.backToDays.addEventListener("click", () => {
 
 setMobileStep("spots");
 setLanguage("nl");
-loadSpots().then(() => loadForecast(state.selectedSpot)).then(refreshRecommendation);
+renderActivities();
