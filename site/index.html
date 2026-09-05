@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SurfKompas</title>
   <link rel="icon" type="image/svg+xml" href="/assets/surfkompas-compass.svg?v=wave5">
-  <link rel="stylesheet" href="/styles.css?v=wave5">
+  <link rel="stylesheet" href="/styles.css?v=wave6">
 </head>
 <body>
   <div class="ocean-lines" aria-hidden="true">
@@ -32,7 +32,7 @@
       <p class="eyebrow" data-i18n="eyebrow">Nederlandse surfvoorspelling</p>
       <h1 data-i18n="heroTitle">Vind het beste moment om te surfen.</h1>
       <p data-i18n="heroCopy">
-        Een mooie, rustige forecast voor Nederlandse surfers: kies een spot, check de komende week en zoom in op 06:00, 10:00, 14:00 of 18:00.
+        Kies je sport, ontdek de beste Nederlandse spot van vandaag en zoom daarna in op het juiste moment.
       </p>
       <div class="surf-charms" aria-hidden="true">
         <span data-i18n="charmNorthSea">Noordzee vibes</span>
@@ -41,6 +41,27 @@
       </div>
     </div>
   </header>
+
+  <section class="activity-picker" aria-labelledby="activityTitle">
+    <div class="activity-picker-heading">
+      <p class="section-kicker" data-i18n="chooseSport">Kies je sport</p>
+      <span class="activity-picker-note" data-i18n="activityNote">Elke sport krijgt zijn eigen conditiescore.</span>
+    </div>
+    <div id="activityGrid" class="activity-grid">
+      <button class="activity-card activity-surf active" type="button" data-activity="surf">
+        <span class="activity-card-art" aria-hidden="true"></span>
+        <span class="activity-card-copy"><strong data-i18n="activitySurf">Golfsurfen</strong><small data-i18n="activitySurfCopy">Swell, periode en golfenergie</small></span>
+      </button>
+      <button class="activity-card activity-kite" type="button" data-activity="kite">
+        <span class="activity-card-art" aria-hidden="true"></span>
+        <span class="activity-card-copy"><strong data-i18n="activityKite">Kitesurfen</strong><small data-i18n="activityKiteCopy">Wind, vlagen en veilige richting</small></span>
+      </button>
+      <button class="activity-card activity-wind" type="button" data-activity="windsurf">
+        <span class="activity-card-art" aria-hidden="true"></span>
+        <span class="activity-card-copy"><strong data-i18n="activityWind">Windsurfen</strong><small data-i18n="activityWindCopy">Wind, water en ruimte om te varen</small></span>
+      </button>
+    </div>
+  </section>
 
   <main class="app-shell">
     <aside class="spot-panel" aria-label="Surfspots">
@@ -63,6 +84,7 @@
             <span id="liveSwell">--</span>
             <span id="liveEnergy">--</span>
           </div>
+          <span id="safetyStatus" class="safety-status"></span>
         </div>
         <div class="selected-side">
           <div class="score-medallion">
@@ -75,6 +97,15 @@
         </div>
       </div>
 
+      <section class="spot-recommendation" id="spotRecommendation" hidden>
+        <div>
+          <p class="section-kicker" data-i18n="bestSpot">Beste spot van vandaag</p>
+          <strong id="recommendationName"></strong>
+          <p id="recommendationText"></p>
+        </div>
+        <button id="useRecommendation" type="button" data-i18n="useSpot">Bekijk deze spot</button>
+      </section>
+
       <div class="mobile-flow-actions" aria-label="Mobiele navigatie">
         <button id="backToSpots" type="button" data-i18n="changeSpot">Andere spot</button>
         <button id="backToDays" type="button" data-i18n="changeDay">Andere dag</button>
@@ -84,7 +115,7 @@
       </div>
 
       <div class="surf-loader" aria-hidden="true">
-        <img src="/assets/surfkompas-van-loader.png?v=wave5" alt="">
+        <img src="/assets/surfkompas-van-loader.png?v=wave6" alt="">
         <span data-i18n="loading">Forecast laden...</span>
       </div>
 
@@ -98,7 +129,7 @@
           <h3 id="vibeTitle">Even laden...</h3>
           <p id="vibeText"></p>
         </div>
-        <img class="poster-card" src="/assets/surfkompas-dawn-waves.png?v=wave5" alt="">
+        <img class="poster-card" src="/assets/surfkompas-dawn-waves.png?v=wave6" alt="">
       </section>
 
       <section class="week-section">
@@ -147,7 +178,7 @@
     </section>
   </main>
 
-  <script src="/forecast.js?v=wave5"></script>
-  <script src="/app.js?v=wave5"></script>
+  <script src="/forecast.js?v=wave6"></script>
+  <script src="/app.js?v=wave6"></script>
 </body>
 </html>

@@ -1,7 +1,21 @@
 const i18n = {
   nl: {
-    beginnerMode: "Kook",
-    expertMode: "Pro",
+    chooseSport: "Kies je sport",
+    activityNote: "Elke sport krijgt zijn eigen conditiescore.",
+    activitySurf: "Golfsurfen",
+    activitySurfCopy: "Swell, periode en golfenergie",
+    activityKite: "Kitesurfen",
+    activityKiteCopy: "Wind, vlagen en veilige richting",
+    activityWind: "Windsurfen",
+    activityWindCopy: "Wind, water en ruimte om te varen",
+    bestSpot: "Beste spot van vandaag",
+    useSpot: "Bekijk deze spot",
+    safety: "Veiligheidsstatus",
+    safetyGood: "Condities zien er rustig genoeg uit",
+    safetyCaution: "Let op vlagen, stroming of drukte",
+    safetyStrong: "Alleen kiezen als je dit goed beheerst",
+    beginnerMode: "Kustkook",
+    expertMode: "Spotpro",
     eyebrow: "Nederlandse surfvoorspelling",
     heroTitle: "Vind het beste moment om te surfen.",
     heroCopy: "Een mooie, rustige forecast voor Nederlandse surfers: kies een spot, check de komende week en zoom in op 06:00, 10:00, 14:00 of 18:00.",
@@ -40,6 +54,20 @@ const i18n = {
     kmh: "km/u",
   },
   en: {
+    chooseSport: "Choose your sport",
+    activityNote: "Each sport gets its own conditions score.",
+    activitySurf: "Surfing",
+    activitySurfCopy: "Swell, period and wave energy",
+    activityKite: "Kitesurfing",
+    activityKiteCopy: "Wind, gusts and safe direction",
+    activityWind: "Windsurfing",
+    activityWindCopy: "Wind, water and room to sail",
+    bestSpot: "Best spot today",
+    useSpot: "View this spot",
+    safety: "Safety status",
+    safetyGood: "Conditions look calm enough",
+    safetyCaution: "Watch gusts, current or crowds",
+    safetyStrong: "Only choose this if you are confident",
     beginnerMode: "Kook",
     expertMode: "Pro",
     eyebrow: "Dutch surf forecast",
@@ -83,6 +111,7 @@ const i18n = {
 
 let state = {
   lang: "nl",
+  activity: "surf",
   expert: false,
   spots: [],
   selectedSpot: null,
@@ -90,6 +119,7 @@ let state = {
   selectedDay: 0,
   selectedWindow: 0,
   mobileStep: "spots",
+  recommendation: null,
 };
 
 const els = {
@@ -104,6 +134,7 @@ const els = {
   liveWind: document.querySelector("#liveWind"),
   liveSwell: document.querySelector("#liveSwell"),
   liveEnergy: document.querySelector("#liveEnergy"),
+  safetyStatus: document.querySelector("#safetyStatus"),
   scoreValue: document.querySelector("#scoreValue"),
   adviceScoreValue: document.querySelector("#adviceScoreValue"),
   vibeTitle: document.querySelector("#vibeTitle"),
@@ -125,6 +156,11 @@ const els = {
   expertGrid: document.querySelector("#expertGrid"),
   backToSpots: document.querySelector("#backToSpots"),
   backToDays: document.querySelector("#backToDays"),
+  activityGrid: document.querySelector("#activityGrid"),
+  spotRecommendation: document.querySelector("#spotRecommendation"),
+  recommendationName: document.querySelector("#recommendationName"),
+  recommendationText: document.querySelector("#recommendationText"),
+  useRecommendation: document.querySelector("#useRecommendation"),
 };
 
 function t(key) {
@@ -193,10 +229,19 @@ function renderSpots() {
   `).join("");
 }
 
+function activityName() {
+  return t(state.activity === "kite" ? "activityKite" : state.activity === "windsurf" ? "activityWind" : "activitySurf");
+}
+
+function renderActivities() {
+  document.querySelectorAll("[data-activity]").forEach((button) => button.classList.toggle("active", button.dataset.activity === state.activity));
+}
+
 async function loadSpots() {
-  state.spots = SurfKompasForecast.spots;
-  state.selectedSpot = state.selectedSpot || SurfKompasForecast.defaultSpot;
+  state.spots = SurfKompasForecast.getSpots(state.activity);
+  state.selectedSpot = SurfKompasForecast.defaultSpotFor(state.activity);
   renderSpots();
+  renderActivities();
 }
 
 async function loadForecast(spotId) {
@@ -207,11 +252,49 @@ async function loadForecast(spotId) {
   document.body.classList.add("is-loading");
   renderSpots();
   try {
-    state.forecast = await SurfKompasForecast.fetchForecastBundle(spotId);
+    state.forecast = await SurfKompasForecast.fetchForecastBundle(spotId, state.activity);
     render();
   } finally {
     document.body.classList.remove("is-loading");
   }
+}
+
+async function refreshRecommendation() {
+  const candidates = state.spots.slice(0, 8);
+  try {
+    const bundles = await Promise.all(candidates.map((spot) => SurfKompasForecast.fetchForecastBundle(spot.id, state.activity)));
+    const ranked = bundles.map((bundle) => ({ bundle, item: bundle.daily[0] })).sort((a, b) => b.item.score - a.item.score);
+    const best = ranked[0];
+    if (!best || best.bundle.spot.id === state.selectedSpot) {
+      state.recommendation = null;
+    } else {
+      state.recommendation = { id: best.bundle.spot.id, name: best.bundle.spot.name, score: best.item.score, vibe: best.item.vibe };
+    }
+    renderRecommendation();
+  } catch (error) {
+    state.recommendation = null;
+  }
+}
+
+function renderRecommendation() {
+  if (!state.recommendation) {
+    els.spotRecommendation.hidden = true;
+    return;
+  }
+  els.spotRecommendation.hidden = false;
+  els.recommendationName.textContent = `${state.recommendation.name} · ${state.recommendation.score}/100`;
+  els.recommendationText.textContent = state.lang === "nl"
+    ? `${local(state.recommendation.vibe)} past vandaag het best bij ${activityName().toLowerCase()}. Je kunt altijd een andere spot kiezen.`
+    : `${local(state.recommendation.vibe)} is the best match today for ${activityName().toLowerCase()}. You can always choose another spot.`;
+}
+
+function setActivity(activity) {
+  if (activity === state.activity) return;
+  state.activity = activity;
+  state.forecast = null;
+  state.recommendation = null;
+  setMobileStep("spots");
+  loadSpots().then(() => loadForecast(state.selectedSpot)).then(refreshRecommendation);
 }
 
 function setMobileStep(step) {
@@ -365,6 +448,9 @@ function render() {
   els.liveWind.textContent = `${t("wind")}: ${item.wind.speedKt} kt ${item.wind.direction}`;
   els.liveSwell.textContent = `${t("swell")}: ${item.swell.heightM} m · ${item.swell.periodS}s`;
   els.liveEnergy.textContent = `${t("energy")}: ${item.swell.energyKwm} kW/m`;
+  const safetyKey = item.score < 35 ? "safetyStrong" : item.score < 55 ? "safetyCaution" : "safetyGood";
+  els.safetyStatus.textContent = `${t("safety")}: ${t(safetyKey)}`;
+  els.safetyStatus.className = `safety-status ${item.score < 35 ? "is-strong" : item.score < 55 ? "is-caution" : "is-good"}`;
   els.scoreValue.textContent = item.score;
   els.adviceScoreValue.textContent = item.score;
   els.vibeTitle.textContent = local(item.vibe);
@@ -377,6 +463,7 @@ function render() {
   renderWindows();
   renderMetrics(item);
   renderExpert(item);
+  renderRecommendation();
 }
 
 document.querySelectorAll("[data-lang]").forEach((button) => {
@@ -389,6 +476,18 @@ els.expertToggles.forEach((button) => {
     syncExpertToggles();
     render();
   });
+});
+
+els.activityGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-activity]");
+  if (button) setActivity(button.dataset.activity);
+});
+
+els.useRecommendation.addEventListener("click", () => {
+  if (!state.recommendation) return;
+  setMobileStep("days");
+  loadForecast(state.recommendation.id);
+  nudgeMobileTo(".forecast-area");
 });
 
 els.spotSearch.addEventListener("input", renderSpots);
@@ -434,4 +533,4 @@ els.backToDays.addEventListener("click", () => {
 
 setMobileStep("spots");
 setLanguage("nl");
-loadSpots().then(() => loadForecast(state.selectedSpot));
+loadSpots().then(() => loadForecast(state.selectedSpot)).then(refreshRecommendation);

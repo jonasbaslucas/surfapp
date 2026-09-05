@@ -246,11 +246,42 @@ h1 {
   color: #ffdca0;
 }
 
+.activity-picker {
+  position: relative;
+  z-index: 3;
+  max-width: 1180px;
+  margin: -92px auto 28px;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 24px;
+  background: rgba(7, 29, 47, .72);
+  box-shadow: 0 22px 50px rgba(3, 17, 30, .18);
+}
+.activity-picker-heading { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin-bottom:14px; }
+.activity-picker-note { color: rgba(235,248,249,.66); font-size:.82rem; }
+.activity-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.activity-card { position:relative; min-height:180px; overflow:hidden; display:flex; align-items:flex-end; text-align:left; border:1px solid rgba(255,255,255,.18); border-radius:18px; padding:0; color:#f6fbfb; background:#12394c; cursor:pointer; transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
+.activity-card:hover, .activity-card.active { transform:translateY(-3px); border-color:#f6b85b; box-shadow:0 12px 28px rgba(0,0,0,.24); }
+.activity-card-art { position:absolute; inset:0; background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.82) 100%), url('/assets/surfkompas-activity-trio.png?v=wave6'); background-size:300% 145%; background-repeat:no-repeat; background-position:0% 50%; }
+.activity-kite .activity-card-art { background-position:50% 50%; }
+.activity-wind .activity-card-art { background-position:100% 50%; }
+.activity-card-copy { position:relative; z-index:1; display:grid; gap:3px; padding:16px; }
+.activity-card-copy strong { font-size:1.1rem; letter-spacing:-.02em; }
+.activity-card-copy small { color:rgba(255,255,255,.72); font-size:.8rem; }
+.spot-recommendation { display:flex; align-items:center; justify-content:space-between; gap:18px; margin:0 0 20px; padding:16px 18px; border:1px solid rgba(246,184,91,.36); border-radius:18px; background:linear-gradient(100deg, rgba(246,184,91,.16), rgba(19,75,92,.42)); }
+.spot-recommendation strong { display:block; margin-top:3px; font-size:1.1rem; }
+.spot-recommendation p:not(.section-kicker) { margin:5px 0 0; color:rgba(238,248,248,.72); font-size:.88rem; }
+.spot-recommendation button { flex:0 0 auto; border:0; border-radius:999px; padding:10px 14px; background:#f6b85b; color:#102a3b; font-weight:800; cursor:pointer; }
+.safety-status { display:inline-flex; margin-top:10px; padding:6px 10px; border-radius:999px; font-size:.73rem; font-weight:800; letter-spacing:.02em; }
+.safety-status.is-good { background:rgba(98,196,139,.16); color:#9ce6b9; }
+.safety-status.is-caution { background:rgba(246,184,91,.18); color:#ffd38b; }
+.safety-status.is-strong { background:rgba(255,109,103,.18); color:#ffaaa5; }
+
 .app-shell {
   position: relative;
   z-index: 3;
   max-width: 1180px;
-  margin: -118px auto 80px;
+  margin: 0 auto 80px;
   padding: 0 22px;
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -920,6 +951,16 @@ body.is-loading .surf-loader {
 }
 
 @media (max-width: 720px) {
+  .activity-picker { margin: 12px 14px 18px; padding: 14px; border-radius: 20px; }
+  .activity-picker-heading { display:block; margin-bottom:10px; }
+  .activity-picker-note { display:block; margin-top:4px; font-size:.75rem; }
+  .activity-grid { grid-template-columns:1fr; gap:10px; }
+  .activity-card { min-height:112px; }
+  .activity-card-copy { padding:13px; }
+  .activity-card-copy strong { font-size:1rem; }
+  .spot-recommendation { align-items:flex-start; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .spot-recommendation button { width:100%; }
+
   html {
     scroll-padding-top: 14px;
   }
@@ -1021,7 +1062,7 @@ body.is-loading .surf-loader {
   }
 
   .app-shell {
-    margin-top: -38px;
+    margin-top: 0;
     padding: 0 13px 44px;
     overflow: visible;
     gap: 22px;

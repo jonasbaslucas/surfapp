@@ -3,6 +3,7 @@ const SurfKompasForecast = (() => {
   const marineApi = "https://marine-api.open-meteo.com/v1/marine";
   const displayDays = 8;
   const defaultSpot = "kijkduin";
+  const activityDefaults = { surf: "kijkduin", kite: "scheveningen-kite", windsurf: "strand-horst" };
   const directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
   const timeWindows = ["06:00", "10:00", "14:00", "18:00"];
   const cache = new Map();
@@ -49,6 +50,42 @@ const SurfKompasForecast = (() => {
     spot("texel-paal-17", "Texel Paal 17", 53.0787, 4.7438, "Waddeneilanden", "Eilandspot met open Noordzee-gevoel en vaak iets andere wind dan de Randstad."),
     spot("ameland", "Ameland", 53.4510, 5.7250, "Waddeneilanden", "Rustige Wadden-spot met exposed strand en veel ruimte."),
   ];
+
+  const kiteSpots = [
+    spot("scheveningen-kite", "Scheveningen", 52.103, 4.259, "Zuid-Holland", "Iconische Noordzeespot; let op drukte, stroming en spotzones.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW", "S"], excellent_wind: ["W", "WSW", "SW"], bad_wind: ["E", "ESE", "SE"] }),
+    spot("maasvlakte-kite", "Maasvlakte 2", 51.934, 3.999, "Zuid-Holland", "Veel ruimte, open water en een stevige golfkant.", { activity: "kite", good_wind: ["W", "WSW", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE", "SE"] }),
+    spot("rockanje-kite", "Rockanje", 51.872, 4.044, "Zuid-Holland", "Ondiepere sportstrandspot met veel ruimte voor een relaxte sessie.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE", "SE"] }),
+    spot("hoek-kite", "Hoek van Holland", 51.989, 4.107, "Zuid-Holland", "Open strand bij de Nieuwe Waterweg; richting en stroming zijn belangrijk.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE", "SE"] }),
+    spot("brouwersdam-kite", "Brouwersdam", 51.767, 3.850, "Zeeland", "Veelzijdige windspot met zeezijde en beschutter water.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("vrouwenpolder-kite", "Vrouwenpolder", 51.593, 3.624, "Zeeland", "Ruime delta-spot waar wind en getij samen de sessie bepalen.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("oostvoorne-kite", "Oostvoorne", 51.914, 4.083, "Zuid-Holland", "Beschutter water met een fijne leercurve bij de juiste richting.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("wijk-kite", "Wijk aan Zee", 52.492, 4.585, "Noord-Holland", "Noordzeespot met golven, wind en een duidelijke launchzone.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("ijmuiden-kite", "IJmuiden", 52.461, 4.555, "Noord-Holland", "Exposed strand met veel energie en stromingsinvloed.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("zandmotor-kite", "Zandmotor", 52.03, 4.17, "Zuid-Holland", "Ruimte en variatie, maar check altijd de lokale zone en stroming.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("noordwijk-kite", "Noordwijk", 52.247, 4.427, "Zuid-Holland", "Toegankelijke kustspot met open ruimte.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("zandvoort-kite", "Zandvoort", 52.372, 4.533, "Noord-Holland", "Populaire beachbreak; kies rustigere momenten.", { activity: "kite", good_wind: ["NW", "W", "WSW", "SW"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("texel-kite", "Texel", 53.079, 4.744, "Waddeneilanden", "Eilandwind met open Noordzee en veel ruimte.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("workum-kite", "Workum", 52.98, 5.43, "Friesland", "Ondiep IJsselmeerwater en een populaire kiteschoolomgeving.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("makkum-kite", "Makkum", 53.05, 5.4, "Friesland", "Lagune en IJsselmeer in één watersportgebied.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("medemblik-kite", "Medemblik", 52.77, 5.1, "Noord-Holland", "IJsselmeerwind met vlak water en ruimte.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("strand-horst-kite", "Strand Horst", 52.31, 5.53, "Gelderland", "Ondiep Wolderwijd en een bekende trainingsspot.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("oesterdam-kite", "Oesterdam", 51.48, 4.21, "Zeeland", "Beschutte getijdeplek; check waterstand en lokale regels.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("grevelingen-kite", "Grevelingenmeer", 51.72, 3.92, "Zeeland", "Beschut meer met vlakker water en veel winddagen.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("muiderberg-kite", "Muiderberg", 52.33, 5.12, "Noord-Holland", "Gooimeer-spot met vlakker water en beperkte ruimte.", { activity: "kite", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+  ];
+
+  const windsurfSpots = kiteSpots.map((item) => ({ ...item, activity: "windsurf" }));
+  windsurfSpots.splice(0, 0,
+    spot("strand-horst", "Strand Horst", 52.31, 5.53, "Gelderland", "Ondiep Wolderwijd, vlak water en veel ruimte om te leren.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("makkum-wind", "Makkum Beach", 53.05, 5.4, "Friesland", "Ondiep IJsselmeerwater, geschikt voor freeride en wave.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("stavoren-wind", "Stavoren", 52.88, 5.36, "Friesland", "Open IJsselmeerwind met ruimte voor langere rakken.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("workum-wind", "Workum", 52.98, 5.43, "Friesland", "Ondiep en toegankelijk IJsselmeerwater.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("lauwersoog-wind", "Lauwersoog", 53.41, 6.2, "Groningen", "Meer en wad met wind in verschillende richtingen.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("oesterdam-wind", "Oesterdam", 51.48, 4.21, "Zeeland", "Beschutte deltawateren met getijdekarakter.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("brouwersdam-wind", "Brouwersdam", 51.767, 3.85, "Zeeland", "Zeezijde en Grevelingen in één klassiek windsurfgebied.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+    spot("westeinder-wind", "Westeinderplassen", 52.24, 4.75, "Noord-Holland", "Meerwind dicht bij Amsterdam, met beperkte ruimte rond de oevers.", { activity: "windsurf", good_wind: ["NW", "W", "SW", "S"], excellent_wind: ["W", "SW"], bad_wind: ["E", "ESE"] }),
+  );
+  const activitySpots = { surf: surfSpots, kite: kiteSpots, windsurf: windsurfSpots.slice(0, 20) };
 
   function publicSpot(item) {
     return {
@@ -152,6 +189,20 @@ const SurfKompasForecast = (() => {
   }
 
   function evaluateConditions(item, wind, swellDirection, swellHeight, period) {
+    if (item.activity === "kite" || item.activity === "windsurf") {
+      const windScore = item.excellent_wind.includes(wind) ? 30 : item.good_wind.includes(wind) ? 25 : item.okay_wind.includes(wind) ? 16 : item.bad_wind.includes(wind) ? 4 : 10;
+      const speed = arguments[5] || 0;
+      const gust = arguments[6] || speed;
+      const idealLow = item.activity === "kite" ? 14 : 12;
+      const idealHigh = item.activity === "kite" ? 26 : 28;
+      const speedScore = speed < idealLow ? 6 : speed > idealHigh + 8 ? 4 : speed > idealHigh ? 15 : 25;
+      const gustSpread = Math.max(0, gust - speed);
+      const gustScore = gustSpread > 14 ? 5 : gustSpread > 8 ? 12 : 20;
+      const waterScore = swellHeight >= 0.4 && period >= 6 ? 20 : 14;
+      const total = clamp(windScore + speedScore + gustScore + waterScore, 0, 100);
+      const quality = total >= 82 ? "Excellent" : total >= 66 ? "Good" : total >= 45 ? "Okay" : "Poor";
+      return { total_score: total, wind_score: windScore, wind_quality: quality, swell_direction_score: waterScore, swell_direction_quality: quality, swell_height_score: speedScore, swell_height_quality: quality, period_score: gustScore, period_quality: quality, verdict: quality };
+    }
     const [windScore, windQuality] = scoreWind(item, wind);
     const [swellDirectionScore, swellDirectionQuality] = scoreSwellDirection(item, swellDirection);
     const [swellHeightScore, swellHeightQuality] = scoreSwellHeight(item, swellHeight);
@@ -205,7 +256,7 @@ const SurfKompasForecast = (() => {
     const airTempC = number(weather.temperature_2m);
     const apparentTempC = number(weather.apparent_temperature);
     const power = wavePowerKwm(swellHeightM, swellPeriodS);
-    const breakdown = evaluateConditions(item, windDirection, swellDirection, swellHeightM, swellPeriodS);
+    const breakdown = evaluateConditions(item, windDirection, swellDirection, swellHeightM, swellPeriodS, windSpeedKmh * 0.539957, windGustKmh * 0.539957);
     const score = breakdown.total_score;
 
     return {
@@ -245,8 +296,8 @@ const SurfKompasForecast = (() => {
     };
   }
 
-  function makeFallbackBundle(spotId) {
-    const item = findSpot(spotId);
+  function makeFallbackBundle(spotId, activity = "surf") {
+    const item = findSpot(spotId, activity);
     const now = new Date();
     const seed = item.name.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % 19;
     const daily = [];
@@ -305,15 +356,17 @@ const SurfKompasForecast = (() => {
     };
   }
 
-  function findSpot(spotId) {
-    return surfSpots.find((item) => item.id === spotId) || surfSpots.find((item) => item.id === defaultSpot);
+  function findSpot(spotId, activity = "surf") {
+    const list = activitySpots[activity] || surfSpots;
+    return list.find((item) => item.id === spotId) || list[0];
   }
 
-  async function fetchForecastBundle(spotId) {
-    const cached = cache.get(spotId);
+  async function fetchForecastBundle(spotId, activity = "surf") {
+    const cacheKey = `${activity}:${spotId}`;
+    const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.cachedAt < 10 * 60 * 1000) return cached.payload;
 
-    const item = findSpot(spotId);
+    const item = findSpot(spotId, activity);
     const now = new Date();
     const weatherUrl = buildUrl(forecastApi, {
       latitude: item.latitude,
@@ -370,18 +423,21 @@ const SurfKompasForecast = (() => {
           en: "Live Open-Meteo model data. Nearby beaches can share the same wave-grid cell.",
         },
       };
-      cache.set(spotId, { cachedAt: Date.now(), payload });
+      cache.set(cacheKey, { cachedAt: Date.now(), payload });
       return payload;
     } catch (error) {
-      const payload = makeFallbackBundle(spotId);
-      cache.set(spotId, { cachedAt: Date.now(), payload });
+      const payload = makeFallbackBundle(spotId, activity);
+      cache.set(cacheKey, { cachedAt: Date.now(), payload });
       return payload;
     }
   }
 
   return {
     defaultSpot,
+    activities: ["surf", "kite", "windsurf"],
     spots: surfSpots.map(publicSpot),
+    getSpots: (activity) => (activitySpots[activity] || surfSpots).map(publicSpot),
+    defaultSpotFor: (activity) => activityDefaults[activity] || defaultSpot,
     fetchForecastBundle,
   };
 })();
