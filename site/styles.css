@@ -270,14 +270,18 @@ h1 {
 .has-activity .activity-card { width:46px; height:46px; aspect-ratio:1; border-radius:50%; }
 .has-activity .activity-card-art { background-size:cover; }
 .has-activity .activity-card-copy { display:none; }
+.activity-icon { display:none; position:relative; z-index:2; width:28px; height:28px; margin:auto; }
+.activity-icon svg { width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.has-activity .activity-card-art { display:none; }
+.has-activity .activity-icon { display:block; }
 .activity-picker-heading { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin-bottom:14px; }
 .activity-picker-note { color: rgba(235,248,249,.66); font-size:.82rem; }
 .activity-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
 .activity-card { position:relative; height:240px; min-height:0; aspect-ratio:auto; overflow:hidden; display:flex; align-items:flex-end; text-align:left; border:1px solid rgba(255,255,255,.18); border-radius:18px; padding:0; color:#f6fbfb; background:#12394c; cursor:pointer; transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
 .activity-card:hover, .activity-card.active { transform:translateY(-3px); border-color:#f6b85b; box-shadow:0 12px 28px rgba(0,0,0,.24); }
-.activity-card-art { position:absolute; inset:0; background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-surf.png?v=wave8'); background-size:cover; background-position:center; background-repeat:no-repeat; background-color:#183c4c; }
-.activity-kite .activity-card-art { background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-kite.png?v=wave8'); }
-.activity-wind .activity-card-art { background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-windsurf.png?v=wave8'); }
+.activity-card-art { position:absolute; inset:0; background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-surf.png?v=wave9'); background-size:cover; background-position:center; background-repeat:no-repeat; background-color:#183c4c; }
+.activity-kite .activity-card-art { background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-kite.png?v=wave9'); }
+.activity-wind .activity-card-art { background-image:linear-gradient(180deg, transparent 28%, rgba(2,18,30,.72) 100%), url('/assets/activity-windsurf.png?v=wave9'); }
 .activity-card-copy { position:relative; z-index:1; display:grid; gap:3px; padding:16px; }
 .activity-card-copy strong { font-size:1.1rem; letter-spacing:-.02em; }
 .activity-card-copy small { color:rgba(255,255,255,.72); font-size:.8rem; }
@@ -287,6 +291,11 @@ h1 {
 .spot-recommendation button { flex:0 0 auto; border:0; border-radius:999px; padding:10px 14px; background:#f6b85b; color:#102a3b; font-weight:800; cursor:pointer; }
 .spot-recommendation-panel { display:block; padding:12px; margin:12px 0; background:linear-gradient(135deg, rgba(246,184,91,.18), rgba(20,127,143,.10)); }
 .spot-recommendation-panel button { width:100%; margin-top:10px; }
+.no-data-card { margin:0; min-height:360px; display:grid; place-items:center; align-content:center; gap:8px; padding:42px 28px; text-align:center; border-radius:24px; color:#f8fbf7; background:radial-gradient(circle at 50% 0, rgba(246,184,91,.24), transparent 45%), linear-gradient(145deg, #0a3b50, #145f6a); }
+.no-data-card h2 { margin:0; font-size:clamp(26px,4vw,42px); color:#fffaf0; }
+.no-data-card p:not(.section-kicker) { max-width:480px; margin:0; color:rgba(255,250,240,.76); line-height:1.55; }
+.no-data-sun { display:grid; place-items:center; width:56px; height:56px; border:1px solid rgba(255,255,255,.28); border-radius:50%; color:#ffd98c; font-size:28px; }
+.forecast-area.has-no-data > :not(.no-data-card) { display:none; }
 .safety-status { display:inline-flex; margin-top:10px; padding:8px 12px; border:1px solid transparent; border-radius:999px; font-size:.76rem; font-weight:850; letter-spacing:.01em; box-shadow:0 5px 12px rgba(20,37,44,.08); }
 .safety-status.is-good { background:#d9f2df; border-color:#9dd9ad; color:#145b35; }
 .safety-status.is-caution { background:#fff0c9; border-color:#efc66d; color:#7a4c00; }

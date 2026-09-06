@@ -14,6 +14,9 @@ const i18n = {
     safetyGood: "Condities zien er rustig genoeg uit",
     safetyCaution: "Let op vlagen, stroming of drukte",
     safetyStrong: "Alleen kiezen als je dit goed beheerst",
+    noDataTitle: "De zee houdt zich even stil",
+    noDataHeading: "Geen live gegevens binnen",
+    noDataText: "SurfKompas wil je geen nep-forecast geven. Kom terug zodra je weer online bent of probeer het over een paar minuten opnieuw.",
     beginnerMode: "Kustkook",
     expertMode: "Spotpro",
     eyebrow: "Nederlandse surfvoorspelling",
@@ -35,7 +38,6 @@ const i18n = {
     temperature: "Temperatuur",
     loading: "Forecast laden...",
     live: "Live model",
-    fallback: "Voorbeelddata",
     search: "Zoek spot of regio",
     best: "Beste moment",
     gusts: "Windstoten",
@@ -68,6 +70,9 @@ const i18n = {
     safetyGood: "Conditions look calm enough",
     safetyCaution: "Watch gusts, current or crowds",
     safetyStrong: "Only choose this if you are confident",
+    noDataTitle: "The sea is quiet for a moment",
+    noDataHeading: "No live data came through",
+    noDataText: "SurfKompas will not invent a forecast. Come back when you are online again or try again in a few minutes.",
     beginnerMode: "Kook",
     expertMode: "Pro",
     eyebrow: "Dutch surf forecast",
@@ -89,7 +94,6 @@ const i18n = {
     temperature: "Temperature",
     loading: "Loading forecast...",
     live: "Live model",
-    fallback: "Sample data",
     search: "Search spot or region",
     best: "Best window",
     gusts: "Gusts",
@@ -163,6 +167,7 @@ const els = {
   useRecommendation: document.querySelector("#useRecommendation"),
   appShell: document.querySelector("#appShell"),
   forecastArea: document.querySelector("#forecastArea"),
+  noDataCard: document.querySelector("#noDataCard"),
 };
 
 function t(key) {
@@ -270,7 +275,7 @@ async function refreshRecommendation() {
   const candidates = state.spots.slice(0, 8);
   try {
     const bundles = await Promise.all(candidates.map((spot) => SurfKompasForecast.fetchForecastBundle(spot.id, state.activity)));
-    const ranked = bundles.map((bundle) => ({ bundle, item: bundle.daily[0] })).sort((a, b) => b.item.score - a.item.score);
+    const ranked = bundles.filter((bundle) => bundle.daily?.length).map((bundle) => ({ bundle, item: bundle.daily[0] })).sort((a, b) => b.item.score - a.item.score);
     const best = ranked[0];
     if (!best || best.bundle.spot.id === state.selectedSpot) {
       state.recommendation = null;
@@ -278,8 +283,11 @@ async function refreshRecommendation() {
       state.recommendation = { id: best.bundle.spot.id, name: best.bundle.spot.name, score: best.item.score, vibe: best.item.vibe };
     }
     renderRecommendation();
+    return state.recommendation;
   } catch (error) {
     state.recommendation = null;
+    renderRecommendation();
+    return null;
   }
 }
 
@@ -304,7 +312,16 @@ function setActivity(activity) {
   document.body.classList.remove("only-sport");
   document.body.classList.add("has-activity");
   setMobileStep("spots");
-  loadSpots().then(refreshRecommendation);
+  loadSpots().then(refreshRecommendation).then((recommendation) => {
+    if (!recommendation) {
+      state.forecast = { status: "error" };
+      els.forecastArea.hidden = false;
+      render();
+      return;
+    }
+    setMobileStep("advice");
+    return loadForecast(recommendation.id);
+  });
 }
 
 function setMobileStep(step) {
@@ -486,9 +503,18 @@ function render() {
   renderSpots();
   if (!state.forecast) return;
 
+  if (state.forecast.status === "error") {
+    els.forecastArea.hidden = false;
+    els.forecastArea.classList.add("has-no-data");
+    els.noDataCard.hidden = false;
+    return;
+  }
+  els.forecastArea.classList.remove("has-no-data");
+  els.noDataCard.hidden = true;
+
   const item = selectedWindow();
   const spot = state.forecast.spot;
-  els.statusLabel.textContent = state.forecast.status === "live" ? t("live") : t("fallback");
+  els.statusLabel.textContent = state.forecast.status === "live" ? t("live") : "";
   els.spotName.textContent = spot.name;
   els.spotDescription.textContent = spot.description;
   els.liveWind.textContent = `${t("wind")}: ${item.wind.speedKt} kt ${item.wind.direction}`;

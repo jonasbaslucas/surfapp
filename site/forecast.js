@@ -307,66 +307,6 @@ const SurfKompasForecast = (() => {
     };
   }
 
-  function makeFallbackBundle(spotId, activity = "surf") {
-    const item = findSpot(spotId, activity);
-    const now = new Date();
-    const seed = item.name.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % 19;
-    const daily = [];
-    const windows = {};
-    for (let dayIndex = 0; dayIndex < displayDays; dayIndex += 1) {
-      const dayWindows = [];
-      for (let slotIndex = 0; slotIndex < timeWindows.length; slotIndex += 1) {
-        const sampleTime = new Date(now);
-        sampleTime.setDate(now.getDate() + dayIndex);
-        sampleTime.setHours(Number(timeWindows[slotIndex].slice(0, 2)), 0, 0, 0);
-        const windKmh = clamp(15 + Math.sin(dayIndex + slotIndex * 0.7) * 8 + seed * 0.25, 4, 38);
-        const swellM = clamp(0.45 + Math.cos(dayIndex * 0.8 + seed) * 0.22 + seed * 0.025, 0.2, 1.8);
-        const periodS = clamp(6.4 + Math.sin(dayIndex * 0.6 + slotIndex) * 2.4, 4.5, 13);
-        const fallbackSwellDirections = ["NW", "WNW", "W", "NNW", "N", "SW"];
-        const fallbackWindDirections = ["E", "ENE", "SE", "S", "SW", "W"];
-        const swellDirection = fallbackSwellDirections[(dayIndex + seed) % fallbackSwellDirections.length];
-        const windDirection = fallbackWindDirections[(dayIndex + slotIndex + seed) % fallbackWindDirections.length];
-        dayWindows.push(buildSnapshot(
-          item,
-          {
-            wind_speed_10m: windKmh,
-            wind_gusts_10m: windKmh * 1.35,
-            wind_direction_10m: directions.indexOf(windDirection) * 22.5,
-            temperature_2m: 18 + Math.sin(dayIndex * 0.4) * 2,
-            apparent_temperature: 18 + Math.sin(dayIndex * 0.4) * 2,
-          },
-          {
-            swell_wave_height: swellM,
-            swell_wave_period: periodS,
-            swell_wave_direction: directions.indexOf(swellDirection) * 22.5,
-            wave_height: swellM * 1.15,
-            wave_period: periodS - 0.5,
-            wave_direction: directions.indexOf(swellDirection) * 22.5,
-            sea_level_height_msl: 0.3 + Math.sin(dayIndex + slotIndex) * 0.45,
-            sea_surface_temperature: 17 + Math.sin(dayIndex * 0.2),
-          },
-          sampleTime,
-          now,
-          timeWindows[slotIndex],
-        ));
-      }
-      windows[String(dayIndex)] = dayWindows;
-      daily.push([...dayWindows].sort((a, b) => b.score - a.score)[0]);
-    }
-    return {
-      status: "fallback",
-      generatedAt: now.toISOString(),
-      spot: publicSpot(item),
-      daily,
-      windows,
-      best: [...daily].sort((a, b) => b.score - a.score)[0],
-      sourceNote: {
-        nl: "Offline voorbeelddata. Live model: Open-Meteo. Spotprofiel: Nederlandse publieke spotinformatie.",
-        en: "Offline sample data. Live model: Open-Meteo. Spot profile: public Dutch spot information.",
-      },
-    };
-  }
-
   function findSpot(spotId, activity = "surf") {
     const list = activitySpots[activity] || surfSpots;
     return list.find((item) => item.id === spotId) || list[0];
@@ -445,7 +385,18 @@ const SurfKompasForecast = (() => {
       cache.set(cacheKey, { cachedAt: Date.now(), payload });
       return payload;
     } catch (error) {
-      const payload = makeFallbackBundle(spotId, activity);
+      const payload = {
+        status: "error",
+        generatedAt: new Date().toISOString(),
+        spot: publicSpot(item),
+        daily: [],
+        windows: {},
+        best: null,
+        sourceNote: {
+          nl: "Geen live gegevens ontvangen.",
+          en: "No live data received.",
+        },
+      };
       cache.set(cacheKey, { cachedAt: Date.now(), payload });
       return payload;
     }
