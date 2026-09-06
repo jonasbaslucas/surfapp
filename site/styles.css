@@ -292,6 +292,7 @@ h1 {
 .spot-recommendation-panel { display:block; padding:12px; margin:12px 0; background:linear-gradient(135deg, rgba(246,184,91,.18), rgba(20,127,143,.10)); }
 .spot-recommendation-panel button { width:100%; margin-top:10px; }
 .no-data-card { margin:0; min-height:360px; display:grid; place-items:center; align-content:center; gap:8px; padding:42px 28px; text-align:center; border-radius:24px; color:#f8fbf7; background:radial-gradient(circle at 50% 0, rgba(246,184,91,.24), transparent 45%), linear-gradient(145deg, #0a3b50, #145f6a); }
+.no-data-card[hidden] { display:none; }
 .no-data-card h2 { margin:0; font-size:clamp(26px,4vw,42px); color:#fffaf0; }
 .no-data-card p:not(.section-kicker) { max-width:480px; margin:0; color:rgba(255,250,240,.76); line-height:1.55; }
 .no-data-sun { display:grid; place-items:center; width:56px; height:56px; border:1px solid rgba(255,255,255,.28); border-radius:50%; color:#ffd98c; font-size:28px; }
