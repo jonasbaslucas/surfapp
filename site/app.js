@@ -273,22 +273,22 @@ async function loadForecast(spotId) {
 
 async function refreshRecommendation() {
   const candidates = state.spots.slice(0, 8);
-  try {
-    const bundles = await Promise.all(candidates.map((spot) => SurfKompasForecast.fetchForecastBundle(spot.id, state.activity)));
-    const ranked = bundles.filter((bundle) => bundle.daily?.length).map((bundle) => ({ bundle, item: bundle.daily[0] })).sort((a, b) => b.item.score - a.item.score);
-    const best = ranked[0];
-    if (!best || best.bundle.spot.id === state.selectedSpot) {
-      state.recommendation = null;
-    } else {
-      state.recommendation = { id: best.bundle.spot.id, name: best.bundle.spot.name, score: best.item.score, vibe: best.item.vibe };
-    }
-    renderRecommendation();
-    return state.recommendation;
-  } catch (error) {
+  const settled = await Promise.allSettled(candidates.map((spot) => SurfKompasForecast.fetchForecastBundle(spot.id, state.activity)));
+  const bundles = settled
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value)
+    .filter((bundle) => bundle?.status === "live" && bundle.daily?.length);
+  const ranked = bundles
+    .map((bundle) => ({ bundle, item: bundle.daily[0] }))
+    .sort((a, b) => b.item.score - a.item.score);
+  const best = ranked[0];
+  if (!best || best.bundle.spot.id === state.selectedSpot) {
     state.recommendation = null;
-    renderRecommendation();
-    return null;
+  } else {
+    state.recommendation = { id: best.bundle.spot.id, name: best.bundle.spot.name, score: best.item.score, vibe: best.item.vibe };
   }
+  renderRecommendation();
+  return state.recommendation;
 }
 
 function renderRecommendation() {
