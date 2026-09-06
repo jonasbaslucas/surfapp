@@ -10,7 +10,7 @@ const i18n = {
     activityWindCopy: "Wind, water en ruimte om te varen",
     bestSpot: "Beste spot van vandaag",
     useSpot: "Bekijk deze spot",
-    safety: "Veiligheidsstatus",
+    safety: "Veiligheid",
     safetyGood: "Condities zien er rustig genoeg uit",
     safetyCaution: "Let op vlagen, stroming of drukte",
     safetyStrong: "Alleen kiezen als je dit goed beheerst",
@@ -313,6 +313,9 @@ function setActivity(activity) {
   document.body.classList.add("has-activity");
   setMobileStep("spots");
   loadSpots().then(refreshRecommendation).then((recommendation) => {
+    // On mobile, let the spot picker be the first forecast step. Desktop keeps
+    // the quick best-spot handoff so the wider layout remains efficient.
+    if (isMobileFlow()) return;
     if (!recommendation) {
       state.forecast = { status: "error" };
       els.forecastArea.hidden = false;

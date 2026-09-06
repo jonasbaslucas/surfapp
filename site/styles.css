@@ -297,7 +297,7 @@ h1 {
 .no-data-card p:not(.section-kicker) { max-width:480px; margin:0; color:rgba(255,250,240,.76); line-height:1.55; }
 .no-data-sun { display:grid; place-items:center; width:56px; height:56px; border:1px solid rgba(255,255,255,.28); border-radius:50%; color:#ffd98c; font-size:28px; }
 .forecast-area.has-no-data > :not(.no-data-card) { display:none; }
-.safety-status { display:inline-flex; margin-top:10px; padding:8px 12px; border:1px solid transparent; border-radius:999px; font-size:.76rem; font-weight:850; letter-spacing:.01em; box-shadow:0 5px 12px rgba(20,37,44,.08); }
+.safety-status { display:inline-flex; max-width:100%; margin-top:10px; padding:8px 12px; border:1px solid transparent; border-radius:999px; font-size:.76rem; font-weight:850; letter-spacing:.01em; line-height:1.15; text-align:center; white-space:normal; box-shadow:0 5px 12px rgba(20,37,44,.08); }
 .safety-status.is-good { background:#d9f2df; border-color:#9dd9ad; color:#145b35; }
 .safety-status.is-caution { background:#fff0c9; border-color:#efc66d; color:#7a4c00; }
 .safety-status.is-strong { background:#ffd9d5; border-color:#eb9690; color:#8d2d27; }
@@ -1171,7 +1171,7 @@ body.is-loading .surf-loader {
     overflow-x: hidden;
     overflow-y: auto;
     max-width: 100%;
-    max-height: 276px;
+    max-height: 294px;
     gap: 8px;
     padding: 2px 4px 8px 1px;
     scroll-snap-type: y proximity;
