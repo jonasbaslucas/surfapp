@@ -298,9 +298,11 @@ function renderRecommendation() {
   }
   els.spotRecommendation.hidden = false;
   els.recommendationName.textContent = `${state.recommendation.name} · ${state.recommendation.score}/100`;
-  els.recommendationText.textContent = state.lang === "nl"
-    ? `${local(state.recommendation.vibe)} past vandaag het best bij ${activityName().toLowerCase()}. Je kunt altijd een andere spot kiezen.`
-    : `${local(state.recommendation.vibe)} is the best match today for ${activityName().toLowerCase()}. You can always choose another spot.`;
+  if (els.recommendationText) {
+    els.recommendationText.textContent = state.lang === "nl"
+      ? `${local(state.recommendation.vibe)} past vandaag het best bij ${activityName().toLowerCase()}. Je kunt altijd een andere spot kiezen.`
+      : `${local(state.recommendation.vibe)} is the best match today for ${activityName().toLowerCase()}. You can always choose another spot.`;
+  }
 }
 
 function setActivity(activity) {

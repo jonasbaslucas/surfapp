@@ -1157,6 +1157,14 @@ body.is-loading .surf-loader {
     content: "4";
   }
 
+  .panel-heading p::before,
+  .week-section .section-kicker::before,
+  .windows-section .section-kicker::before,
+  .today-card .section-kicker::before {
+    display: none;
+    content: none;
+  }
+
   .spot-search {
     margin: 11px 0 12px;
     padding: 11px 13px;
@@ -1641,6 +1649,7 @@ body.is-loading .surf-loader {
     flex: initial;
     min-height: 112px;
     padding: 10px;
+    background: linear-gradient(145deg, #fffaf0, #f6e8cf);
   }
 
   .day-card strong {
@@ -1658,6 +1667,7 @@ body.is-loading .surf-loader {
   .window-card {
     min-height: 108px;
     padding: 11px;
+    background: linear-gradient(145deg, #f2fbf8, #dcefeb);
   }
 
   .window-card h4 {
@@ -1675,6 +1685,19 @@ body.is-loading .surf-loader {
 
   .detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric {
+    background: linear-gradient(145deg, #f4f7fa, #e4edf1);
+  }
+
+  .metric.energy {
+    background: linear-gradient(145deg, #fff4d8, #f5ddb0);
+  }
+
+  .safety-status {
+    font-size: .7rem;
+    padding: 7px 9px;
   }
 
   .metric {
