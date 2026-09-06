@@ -70,6 +70,14 @@
         <span id="spotCount">20</span>
       </div>
       <input id="spotSearch" class="spot-search" type="search" placeholder="Zoek spot of regio">
+      <section class="spot-recommendation spot-recommendation-panel" id="spotRecommendation" hidden>
+        <div>
+          <p class="section-kicker" data-i18n="bestSpot">Beste spot van vandaag</p>
+          <strong id="recommendationName"></strong>
+          <p id="recommendationText"></p>
+        </div>
+        <button id="useRecommendation" type="button" data-i18n="useSpot">Bekijk deze spot</button>
+      </section>
       <div id="spotList" class="spot-list"></div>
     </aside>
 
@@ -97,15 +105,6 @@
           </div>
         </div>
       </div>
-
-      <section class="spot-recommendation" id="spotRecommendation" hidden>
-        <div>
-          <p class="section-kicker" data-i18n="bestSpot">Beste spot van vandaag</p>
-          <strong id="recommendationName"></strong>
-          <p id="recommendationText"></p>
-        </div>
-        <button id="useRecommendation" type="button" data-i18n="useSpot">Bekijk deze spot</button>
-      </section>
 
       <div class="mobile-flow-actions" aria-label="Mobiele navigatie">
         <button id="backToSpots" type="button" data-i18n="changeSpot">Andere spot</button>

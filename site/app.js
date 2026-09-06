@@ -1,7 +1,7 @@
 const i18n = {
   nl: {
-    chooseSport: "Kies je sport",
-    activityNote: "Elke sport krijgt zijn eigen conditiescore.",
+    chooseSport: "Waar krijg je vandaag zin in?",
+    activityNote: "Kies je sport en vind je volgende sessie.",
     activitySurf: "Golfsurfen",
     activitySurfCopy: "Swell, periode en golfenergie",
     activityKite: "Kitesurfen",
@@ -17,7 +17,7 @@ const i18n = {
     beginnerMode: "Kustkook",
     expertMode: "Spotpro",
     eyebrow: "Nederlandse surfvoorspelling",
-    heroTitle: "Vind het beste moment om te surfen.",
+    heroTitle: "Klaar om het water op te gaan?",
     heroCopy: "Een mooie, rustige forecast voor Nederlandse surfers: kies een spot, check de komende week en zoom in op 06:00, 10:00, 14:00 of 18:00.",
     spotsLabel: "Surfspots",
     score: "score",
@@ -54,8 +54,8 @@ const i18n = {
     kmh: "km/u",
   },
   en: {
-    chooseSport: "Choose your sport",
-    activityNote: "Each sport gets its own conditions score.",
+    chooseSport: "What are you craving today?",
+    activityNote: "Choose your sport and find your next session.",
     activitySurf: "Surfing",
     activitySurfCopy: "Swell, period and wave energy",
     activityKite: "Kitesurfing",
@@ -71,7 +71,7 @@ const i18n = {
     beginnerMode: "Kook",
     expertMode: "Pro",
     eyebrow: "Dutch surf forecast",
-    heroTitle: "Find the best time to surf.",
+    heroTitle: "Ready to get on the water?",
     heroCopy: "A clean forecast for Dutch surfers: choose a spot, scan the week, then zoom into 06:00, 10:00, 14:00 or 18:00.",
     spotsLabel: "Surf spots",
     score: "score",
@@ -302,8 +302,9 @@ function setActivity(activity) {
   state.recommendation = null;
   state.selectedSpot = null;
   document.body.classList.remove("only-sport");
+  document.body.classList.add("has-activity");
   setMobileStep("spots");
-  loadSpots();
+  loadSpots().then(refreshRecommendation);
 }
 
 function setMobileStep(step) {
@@ -495,7 +496,7 @@ function render() {
   els.liveEnergy.textContent = `${t("energy")}: ${item.swell.energyKwm} kW/m`;
   const safetyKey = (state.activity === "kite" || state.activity === "windsurf") && item.breakdown.wind_score <= 4 ? "safetyStrong" : (item.score < 35 || item.wind.gustKt - item.wind.speedKt >= 10) ? "safetyCaution" : "safetyGood";
   els.safetyStatus.textContent = `${t("safety")}: ${t(safetyKey)}`;
-  els.safetyStatus.className = `safety-status ${item.score < 35 ? "is-strong" : item.score < 55 ? "is-caution" : "is-good"}`;
+  els.safetyStatus.className = `safety-status ${safetyKey === "safetyStrong" ? "is-strong" : safetyKey === "safetyCaution" ? "is-caution" : "is-good"}`;
   els.scoreValue.textContent = item.score;
   els.adviceScoreValue.textContent = item.score;
   els.vibeTitle.textContent = local(item.vibe);
@@ -531,7 +532,7 @@ els.activityGrid.addEventListener("click", (event) => {
 els.useRecommendation.addEventListener("click", () => {
   if (!state.recommendation) return;
   setMobileStep("days");
-  loadForecast(state.recommendation.id);
+  loadForecast(state.recommendation.id).then(refreshRecommendation);
   nudgeMobileTo(".forecast-area");
 });
 

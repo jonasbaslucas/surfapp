@@ -222,7 +222,17 @@ const SurfKompasForecast = (() => {
     };
   }
 
-  function vibe(score) {
+  function vibe(score, activity = "surf") {
+    const copy = activity === "kite"
+      ? { excellent: ["Wind staat aan", "Wind is on", "Sterke wind en een bruikbare richting: dit is een sessievenster om te onthouden.", "Strong wind and a workable direction: this is a session window worth remembering."], good: ["Lekker kiten", "Fun kite", "De wind ziet er bruikbaar uit. Check vooral vlagen en ruimte bij de launch.", "The wind looks workable. Pay extra attention to gusts and launch space."], maybe: ["Goed timen", "Time it right", "Er zit een kitevenster in, maar timing en vlaagspreiding maken het verschil.", "There is a kite window, but timing and gust spread matter."], messy: ["Twijfelachtig", "Questionable", "Windrichting of vlagen maken dit een onrustige keuze.", "Direction or gusts make this a restless choice."], quiet: ["Wachten op wind", "Wait for wind", "Vandaag weinig betrouwbare wind voor een ontspannen sessie.", "Not much reliable wind for a relaxed session today."] }
+      : activity === "windsurf"
+        ? { excellent: ["Lekker varen", "Ready to sail", "Een stevig en bruikbaar windvenster met genoeg ruimte om te varen.", "A solid, usable wind window with enough room to sail."], good: ["Goede winddag", "Good wind day", "De wind is bruikbaar. Check de vlagen en het water voordat je optuigt.", "The wind is usable. Check gusts and water before rigging."], maybe: ["Goed timen", "Time it right", "Er zit een vaarmoment in, maar de wind kan wisselen.", "There is a sailing window, but the wind may shift."], messy: ["Onrustig water", "Choppy call", "Vlagen of richting maken dit een technische sessie.", "Gusts or direction make this a technical session."], quiet: ["Rustig water", "Quiet water", "Vandaag weinig betrouwbare wind om lekker te varen.", "Not much reliable wind for a proper sail today."] }
+        : null;
+    if (copy) {
+      const key = score >= 82 ? "excellent" : score >= 66 ? "good" : score >= 50 ? "maybe" : score >= 35 ? "messy" : "quiet";
+      const value = copy[key];
+      return { key, nl: value[0], en: value[1], tone_nl: value[2], tone_en: value[3] };
+    }
     if (score >= 82) return { key: "excellent", nl: "Board pakken", en: "Grab your board", tone_nl: "Dit is een echte go: goede push, nette richting en een raam om je dag omheen te plannen.", tone_en: "This is a proper go: good push, clean direction, and a window worth planning around." };
     if (score >= 66) return { key: "good", nl: "Leuke sessie", en: "Fun session", tone_nl: "Ziet er surfbaar en leuk uit. Check de wind nog even, maar dit kan zeker de moeite zijn.", tone_en: "Looks surfable and fun. Check the wind once more, but this one is worth a look." };
     if (score >= 50) return { key: "maybe", nl: "Goed timen", en: "Time it right", tone_nl: "Niet perfect, wel kans op wat ritjes als je het juiste moment pakt.", tone_en: "Not perfect, but there could be a few waves if you catch the right window." };
@@ -267,7 +277,7 @@ const SurfKompasForecast = (() => {
       dayLabel: dayLabel(sampleTime, now),
       shortDate: formatDate(sampleTime),
       score,
-      vibe: vibe(score),
+      vibe: vibe(score, item.activity),
       wind: {
         speedKmh: Number(windSpeedKmh.toFixed(1)),
         speedKt: Number((windSpeedKmh * 0.539957).toFixed(1)),
