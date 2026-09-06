@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SurfKompas</title>
   <link rel="icon" type="image/svg+xml" href="/assets/surfkompas-compass.svg?v=wave7">
-  <link rel="stylesheet" href="/styles.css?v=wave15">
+  <link rel="stylesheet" href="/styles.css?v=wave18">
 </head>
 <body>
   <div class="ocean-lines" aria-hidden="true">
@@ -21,12 +21,19 @@
         <span class="brand-compass" aria-hidden="true"></span>
       </a>
       <div class="toolbar">
+        <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="siteMenu" aria-label="Menu openen"><span></span><span></span><span></span></button>
         <div class="language-switch" aria-label="Taal">
           <button class="toggle active" type="button" data-lang="nl">NL</button>
           <button class="toggle" type="button" data-lang="en">EN</button>
         </div>
       </div>
     </nav>
+
+    <aside class="site-menu" id="siteMenu" hidden>
+      <button class="site-menu-link active" type="button" data-page="forecastPage" data-i18n="navForecast">Surfadvies</button>
+      <button class="site-menu-link" type="button" data-page="aboutPage" data-i18n="navAbout">Over SurfKompas</button>
+      <button class="site-menu-link" type="button" data-page="feedbackPage" data-i18n="navFeedback">Feedback</button>
+    </aside>
 
     <div class="hero-content">
       <p class="eyebrow" data-i18n="eyebrow">Nederlandse surfvoorspelling</p>
@@ -114,6 +121,14 @@
         </div>
       </div>
 
+      <section class="nowcast-card" id="nowcastCard" hidden>
+        <div class="section-row">
+          <p class="section-kicker" data-i18n="nowcastTitle">Nu + komende 4 uur</p>
+          <p id="stabilityLabel" class="source-note"></p>
+        </div>
+        <div id="nowcastGrid" class="nowcast-grid"></div>
+      </section>
+
       <div class="mobile-flow-actions" aria-label="Mobiele navigatie">
         <button id="backToSpots" type="button" data-i18n="changeSpot">Andere spot</button>
         <button id="backToDays" type="button" data-i18n="changeDay">Andere dag</button>
@@ -187,7 +202,28 @@
     </section>
   </main>
 
-  <script src="/forecast.js?v=wave7"></script>
-  <script src="/app.js?v=wave16"></script>
+  <section class="info-page" id="aboutPage" hidden>
+    <p class="section-kicker" data-i18n="aboutKicker">Over SurfKompas</p>
+    <h2 data-i18n="aboutTitle">Een eerlijker kompas voor Nederlandse watersport.</h2>
+    <p data-i18n="aboutCopy">SurfKompas combineert meerdere weermodellen met lokale spotkennis. We tonen onzekerheid eerlijk en leren in de labversie van sessiefeedback.</p>
+  </section>
+
+  <section class="info-page feedback-page" id="feedbackPage" hidden>
+    <p class="section-kicker" data-i18n="feedbackKicker">Na je sessie</p>
+    <h2 data-i18n="feedbackTitle">Klopt de verwachting met het water?</h2>
+    <p data-i18n="feedbackCopy">Je feedback wordt in deze labversie lokaal opgeslagen en gebruikt om spotcorrecties te berekenen.</p>
+    <form id="feedbackForm" class="feedback-form">
+      <label><span data-i18n="feedbackSport">Sport</span><select id="feedbackActivity"><option value="surf">Golfsurfen</option><option value="kite">Kitesurfen</option><option value="windsurf">Windsurfen</option></select></label>
+      <label><span data-i18n="feedbackSpot">Spot</span><select id="feedbackSpot"></select></label>
+      <label><span data-i18n="feedbackDate">Datum</span><input id="feedbackDate" type="date" required></label>
+      <label><span data-i18n="feedbackTime">Tijd</span><input id="feedbackTime" type="time" required></label>
+      <label><span data-i18n="feedbackWind">Hoe voelde de wind?</span><select id="feedbackWind"><option value="less">Minder wind dan verwacht</option><option value="match">Ongeveer zoals verwacht</option><option value="more">Meer wind dan verwacht</option></select></label>
+      <button class="primary-button" type="submit" data-i18n="feedbackSubmit">Feedback opslaan</button>
+      <p class="feedback-status" id="feedbackStatus" role="status"></p>
+    </form>
+  </section>
+
+  <script src="/forecast.js?v=wave17"></script>
+  <script src="/app.js?v=wave18"></script>
 </body>
 </html>

@@ -54,6 +54,27 @@ const i18n = {
     changeSpot: "Andere spot",
     changeDay: "Andere dag",
     kmh: "km/u",
+    navForecast: "Surfadvies",
+    navAbout: "Over SurfKompas",
+    navFeedback: "Feedback",
+    nowcastTitle: "Nu + komende 4 uur",
+    stabilitySteady: "Stabiele wind",
+    stabilityMixed: "Wisselende wind",
+    stabilityGusty: "Vlagerige wind",
+    modelSpread: "Modelverschil",
+    aboutKicker: "Over SurfKompas",
+    aboutTitle: "Een eerlijker kompas voor Nederlandse watersport.",
+    aboutCopy: "SurfKompas combineert meerdere weermodellen met lokale spotkennis. We tonen onzekerheid eerlijk en leren in de labversie van sessiefeedback.",
+    feedbackKicker: "Na je sessie",
+    feedbackTitle: "Klopt de verwachting met het water?",
+    feedbackCopy: "Je feedback wordt in deze labversie lokaal opgeslagen en gebruikt om spotcorrecties te berekenen.",
+    feedbackSport: "Sport",
+    feedbackSpot: "Spot",
+    feedbackDate: "Datum",
+    feedbackTime: "Tijd",
+    feedbackWind: "Hoe voelde de wind?",
+    feedbackSubmit: "Feedback opslaan",
+    feedbackSaved: "Opgeslagen. Deze labversie gebruikt je correctie bij volgende forecasts.",
   },
   en: {
     chooseSport: "What are you craving today?",
@@ -110,6 +131,27 @@ const i18n = {
     changeSpot: "Change spot",
     changeDay: "Change day",
     kmh: "km/h",
+    navForecast: "Surf advice",
+    navAbout: "About SurfKompas",
+    navFeedback: "Feedback",
+    nowcastTitle: "Now + next 4 hours",
+    stabilitySteady: "Steady wind",
+    stabilityMixed: "Mixed wind",
+    stabilityGusty: "Gusty wind",
+    modelSpread: "Model spread",
+    aboutKicker: "About SurfKompas",
+    aboutTitle: "A more honest compass for Dutch watersports.",
+    aboutCopy: "SurfKompas combines multiple weather models with local spot knowledge. We show uncertainty honestly and learn from session feedback in this lab version.",
+    feedbackKicker: "After your session",
+    feedbackTitle: "Did the forecast match the water?",
+    feedbackCopy: "In this lab version your feedback is stored locally and used to calculate spot corrections.",
+    feedbackSport: "Sport",
+    feedbackSpot: "Spot",
+    feedbackDate: "Date",
+    feedbackTime: "Time",
+    feedbackWind: "How did the wind feel?",
+    feedbackSubmit: "Save feedback",
+    feedbackSaved: "Saved. This lab version will use your correction in future forecasts.",
   },
 };
 
@@ -168,6 +210,21 @@ const els = {
   appShell: document.querySelector("#appShell"),
   forecastArea: document.querySelector("#forecastArea"),
   noDataCard: document.querySelector("#noDataCard"),
+  nowcastCard: document.querySelector("#nowcastCard"),
+  nowcastGrid: document.querySelector("#nowcastGrid"),
+  stabilityLabel: document.querySelector("#stabilityLabel"),
+  menuButton: document.querySelector("#menuButton"),
+  siteMenu: document.querySelector("#siteMenu"),
+  pageLinks: document.querySelectorAll("[data-page]"),
+  aboutPage: document.querySelector("#aboutPage"),
+  feedbackPage: document.querySelector("#feedbackPage"),
+  feedbackForm: document.querySelector("#feedbackForm"),
+  feedbackActivity: document.querySelector("#feedbackActivity"),
+  feedbackSpot: document.querySelector("#feedbackSpot"),
+  feedbackDate: document.querySelector("#feedbackDate"),
+  feedbackTime: document.querySelector("#feedbackTime"),
+  feedbackWind: document.querySelector("#feedbackWind"),
+  feedbackStatus: document.querySelector("#feedbackStatus"),
 };
 
 function t(key) {
@@ -196,6 +253,7 @@ function setLanguage(lang) {
   els.brandWord.textContent = lang === "nl" ? "SurfKompas" : "SurfCompass";
   els.spotSearch.placeholder = t("search");
   syncExpertToggles();
+  syncFeedbackSpots();
   render();
 }
 
@@ -205,6 +263,27 @@ function syncExpertToggles() {
     button.setAttribute("aria-pressed", String(isPro === state.expert));
     button.textContent = isPro ? t("expertMode") : t("beginnerMode");
   });
+}
+
+function syncFeedbackSpots() {
+  if (!els.feedbackSpot || !els.feedbackActivity) return;
+  const current = els.feedbackSpot.value;
+  const spots = SurfKompasForecast.getSpots(els.feedbackActivity.value);
+  els.feedbackSpot.innerHTML = spots.map((spot) => `<option value="${spot.id}">${spot.name}</option>`).join("");
+  if (spots.some((spot) => spot.id === current)) els.feedbackSpot.value = current;
+}
+
+function showPage(pageId) {
+  const isForecast = pageId === "forecastPage";
+  els.appShell.hidden = !isForecast || !state.activity;
+  document.querySelector(".activity-picker").hidden = !isForecast;
+  els.aboutPage.hidden = pageId !== "aboutPage";
+  els.feedbackPage.hidden = pageId !== "feedbackPage";
+  els.pageLinks.forEach((link) => link.classList.toggle("active", link.dataset.page === pageId));
+  els.siteMenu.hidden = true;
+  els.menuButton.setAttribute("aria-expanded", "false");
+  document.body.classList.toggle("info-page-active", !isForecast);
+  if (pageId === "feedbackPage") syncFeedbackSpots();
 }
 
 function scoreClass(score) {
@@ -478,6 +557,23 @@ function renderExpert(item) {
   `;
 }
 
+function renderNowcast() {
+  const items = state.forecast?.nowcast || [];
+  if (!els.nowcastCard || !els.nowcastGrid) return;
+  els.nowcastCard.hidden = !items.length;
+  if (!items.length) return;
+  const first = items[0];
+  const stabilityKey = first.stability?.key || "mixed";
+  els.stabilityLabel.textContent = `${t(`stability${stabilityKey[0].toUpperCase()}${stabilityKey.slice(1)}`)} · ${t("modelSpread")}: ${first.stability?.modelSpreadKmh ?? 0} km/u`;
+  els.nowcastGrid.innerHTML = items.map((item) => `
+    <article class="nowcast-item">
+      <strong>${item.hour}</strong>
+      <span>${item.wind.speedKt} kt · ${item.wind.direction}</span>
+      <small>${t(`stability${item.stability.key[0].toUpperCase()}${item.stability.key.slice(1)}`)} · ${item.score}/100</small>
+    </article>
+  `).join("");
+}
+
 function safetyText(item) {
   if (state.activity === "kite" || state.activity === "windsurf") {
     if (item.breakdown.wind_score <= 4) return state.lang === "nl" ? "Windrichting niet geschikt" : "Wind direction not suitable";
@@ -532,7 +628,11 @@ function render() {
   els.adviceScoreValue.textContent = item.score;
   els.vibeTitle.textContent = local(item.vibe);
   els.vibeText.textContent = localTone(item.vibe);
-  els.sourceNote.textContent = `${t("sourcePrefix")}: ${local(state.forecast.sourceNote)}`;
+  const station = state.forecast.stationObservation;
+  const stationNote = station
+    ? (state.lang === "nl" ? ` · Meetstation ${station.station}` : ` · Station ${station.station}`)
+    : "";
+  els.sourceNote.textContent = `${t("sourcePrefix")}: ${local(state.forecast.sourceNote)}${stationNote}`;
 
   document.querySelector(".score-medallion").className = `score-medallion ${scoreClass(item.score)} ${scoreTone(item.score)}`;
   document.querySelector(".advice-score").className = `advice-score ${scoreTone(item.score)}`;
@@ -540,11 +640,40 @@ function render() {
   renderWindows();
   renderMetrics(item);
   renderExpert(item);
+  renderNowcast();
   renderRecommendation();
 }
 
 document.querySelectorAll("[data-lang]").forEach((button) => {
   button.addEventListener("click", () => setLanguage(button.dataset.lang));
+});
+
+els.menuButton.addEventListener("click", () => {
+  const open = els.siteMenu.hidden;
+  els.siteMenu.hidden = !open;
+  els.menuButton.setAttribute("aria-expanded", String(open));
+});
+
+els.pageLinks.forEach((link) => {
+  link.addEventListener("click", () => showPage(link.dataset.page));
+});
+
+els.feedbackActivity.addEventListener("change", syncFeedbackSpots);
+els.feedbackForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const direction = els.feedbackWind.value === "less" ? -2 : els.feedbackWind.value === "more" ? 2 : 0;
+  const entry = {
+    activity: els.feedbackActivity.value,
+    spotId: els.feedbackSpot.value,
+    date: els.feedbackDate.value,
+    time: els.feedbackTime.value,
+    windDeltaKt: direction,
+    createdAt: new Date().toISOString(),
+  };
+  const existing = JSON.parse(localStorage.getItem("surfkompas-feedback") || "[]");
+  existing.push(entry);
+  localStorage.setItem("surfkompas-feedback", JSON.stringify(existing.slice(-100)));
+  els.feedbackStatus.textContent = t("feedbackSaved");
 });
 
 els.modeOptions.forEach((button) => {
@@ -612,3 +741,6 @@ setMobileStep("spots");
 document.body.classList.add("only-sport");
 setLanguage("nl");
 renderActivities();
+els.feedbackDate.value = new Date().toISOString().slice(0, 10);
+els.feedbackTime.value = `${String(new Date().getHours()).padStart(2, "0")}:00`;
+syncFeedbackSpots();
